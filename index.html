@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вайб — Твой цифровой ассистент</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #08080a;
+            --accent-color: #00f2ff;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --text-color: #ffffff;
+            --secondary-text: #94a3b8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Анимированный фон */
+        .bg-glow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 30%, #1e293b 0%, #08080a 70%);
+            z-index: -1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        /* Ядро Вайба */
+        .vibe-visual {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+        }
+
+        .core {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, var(--accent-color) 0%, transparent 65%);
+            border-radius: 50%;
+            filter: blur(15px);
+            animation: pulse 3s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        .orbit {
+            position: absolute;
+            top: -10%; left: -10%; width: 120%; height: 120%;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 50%;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 0.8; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            margin: 0;
+            background: linear-gradient(to right, #fff, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--secondary-text);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        /* Сетка возможностей */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 50px;
+            padding-bottom: 100px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 16px;
+            transition: 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            background: rgba(0, 242, 255, 0.02);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card ul {
+            padding: 0;
+            list-style: none;
+            color: var(--secondary-text);
+            font-size: 0.95rem;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card li::before {
+            content: "→";
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">Вайб</div>
+            <div style="color: var(--secondary-text); font-size: 0.9rem;">v1.0 Beta</div>
+        </header>
+
+        <main class="hero">
+            <div class="vibe-visual">
+                <div class="core"></div>
+                <div class="orbit"></div>
+            </div>
+            <h1>Ассистент с твоим характером</h1>
+            <p>Голосовое управление системой, мультимедиа и идеальный порядок на рабочем столе.</p>
+        </main>
+
+        <section class="grid">
+            <div class="card">
+                <h3>Управление ОС</h3>
+                <ul>
+                    <li>Открытие браузера и YouTube</li>
+                    <li>Запуск Диспетчера задач</li>
+                    <li>Мгновенный вызов Блокнота</li>
+                    <li>Установка таймеров</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Медиа-контроль</h3>
+                <ul>
+                    <li>Пауза и воспроизведение</li>
+                    <li>Переключение треков</li>
+                    <li>Управление громкостью</li>
+                    <li>Голосовой поиск музыки</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Чистый стол</h3>
+                <p style="font-size: 0.85rem; color: var(--secondary-text); margin-bottom: 10px;">Авто-сортировка файлов по категориям:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <span style="font-size: 0.7rem; background: rgba(0,242,255,0.1); padding: 2px 8px; border-radius: 4px;">Docs</span>
+                    <span style="font-size: 0.7rem; background: rgba(0,242,255,0.1); padding: 2px 8px; border-radius: 4px;">Images</span>
+                    <span style="font-size: 0.7rem; background: rgba(0,242,255,0.1); padding: 2px 8px; border-radius: 4px;">Python_Scripts</span>
+                    <span style="font-size: 0.7rem; background: rgba(0,242,255,0.1); padding: 2px 8px; border-radius: 4px;">Media</span>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            &copy; 2026 Проект "Вайб". Сделано для будущего.
+        </footer>
+    </div>
+
+</body>
+</html>
