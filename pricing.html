@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вайб — Тарифы</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Контейнер для уведомлений -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">Вайб</div>
+            <div class="header-right">
+                <a href="index.html" class="reviews-btn">Главная</a>
+                <div id="user-menu" style="display: none;" class="user-badge">
+                    <span id="user-name"></span>
+                    <button class="logout-btn" id="logout-btn">⏻</button>
+                </div>
+                <button class="login-btn" id="login-btn">Войти</button>
+            </div>
+        </header>
+
+        <main>
+            <section class="pricing-section">
+                <h2>Выберите тариф</h2>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3>Free</h3>
+                        <div class="price">—</div>
+                        <ul>
+                            <li>Ограниченные запросы</li>
+                            <li>Ограниченные команды</li>
+
+                        </ul>
+                    </div>
+                    <div class="pricing-card">
+                        <h3>Basic</h3>
+                        <div class="price">—</div>
+                        <ul>
+                            <li>Все команды</li>
+                            <li>Доступ к маркетплейсу</li>
+                            <li>Поддержка</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-card">
+                        <h3>Pro</h3>
+                        <div class="price">—</div>
+                        <ul>
+                            <li>Все функции Basic</li>
+                            <li>Подключение других устройств</li>
+                            <li></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="secret-note">Возможно подстройка под ваш характер ;)</div>
+            <div>DESIGNED BY REUZ0201 &copy; 2026</div>
+        </footer>
+    </div>
+
+    <!-- Подключаем Firebase и скрипт для страницы тарифов -->
+    <script type="module" src="script-pricing.js"></script>
+</body>
+</html>
