@@ -3,137 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вайб — Ассистент</title>
+    <title>Вайб — Ассистент с отзывами</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0f1113;
-            --accent-color: #00f2ff;
-            --text-main: #f5f5f7;
-            --text-dim: #86868b;
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
-
-        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        #bg-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 900px;
-            padding: 0 40px;
-            position: relative;
-            z-index: 1;
-        }
-
-        header { width: 100%; padding: 40px 0; display: flex; justify-content: space-between; align-items: center; opacity: 0.8; }
-        .logo { font-weight: 600; letter-spacing: -0.5px; font-size: 1.2rem; }
-        .status { font-size: 0.75rem; color: var(--accent-color); display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
-        .status-dot { width: 6px; height: 6px; background: var(--accent-color); border-radius: 50%; box-shadow: 0 0 8px var(--accent-color); }
-
-        .hero { margin-top: 60px; text-align: center; }
-        .vibe-visual { position: relative; width: 200px; height: 200px; margin: 0 auto 40px; }
-        .core { 
-            position: absolute; top: 50%; left: 50%; 
-            width: 60px; height: 60px; 
-            background: var(--accent-color); 
-            border-radius: 50%; transform: translate(-50%, -50%); 
-            box-shadow: 0 0 60px rgba(0, 242, 255, 0.3); 
-            transition: transform 0.1s ease;
-        }
-        
-        .wave { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; border: 1px solid var(--glass-border); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: translate(-50%, -50%); animation: rotate-wave 12s linear infinite; }
-        .wave:nth-child(2) { width: 80%; height: 80%; animation-duration: 8s; animation-direction: reverse; }
-
-        @keyframes rotate-wave { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-        h1 { font-weight: 500; font-size: 2.5rem; margin-bottom: 16px; letter-spacing: -1px; min-height: 3.5rem; }
-        
-        /* Черно-белый эффект для подзаголовка с эмодзи */
-        .subtitle { 
-            color: var(--text-dim); 
-            font-size: 1.1rem; 
-            max-width: 550px; 
-            margin: 0 auto 40px; 
-            font-weight: 300; 
-            min-height: 3rem;
-            filter: grayscale(100%); /* Делает эмодзи черно-белым */
-        }
-
-        .mic-btn {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            color: var(--accent-color);
-            padding: 10px 24px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            margin-bottom: 60px;
-            font-weight: 500;
-        }
-        .mic-btn:hover { background: rgba(0, 242, 255, 0.1); border-color: var(--accent-color); }
-        .mic-active { background: var(--accent-color) !important; color: #000 !important; box-shadow: 0 0 15px var(--accent-color); }
-
-        .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 80px; }
-        .card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 15px; text-transform: uppercase; color: var(--accent-color); letter-spacing: 1px; }
-        .card ul { padding: 0; margin: 0; }
-        .card li { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 8px; list-style: none; }
-        .folder-list { display: flex; flex-wrap: wrap; gap: 8px; }
-        .folder { font-size: 0.75rem; color: var(--text-main); border: 1px solid var(--glass-border); padding: 4px 10px; border-radius: 4px; }
-
-        /* Волна при клике */
-        .ripple {
-            position: fixed;
-            border: 1px solid var(--accent-color);
-            background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            transform: translate(-50%, -50%);
-            animation: ripple-anim 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-            z-index: 2;
-        }
-        @keyframes ripple-anim {
-            0% { width: 0; height: 0; opacity: 1; }
-            100% { width: 600px; height: 600px; opacity: 0; }
-        }
-
-        footer { padding: 40px 0; text-align: center; font-size: 0.7rem; color: var(--text-dim); border-top: 1px solid var(--glass-border); width: 100%; }
-        .secret-note { opacity: 0.1; transition: 0.8s; cursor: default; margin-bottom: 10px; }
-        .secret-note:hover { opacity: 1; color: var(--accent-color); }
-
-        @media (max-width: 768px) { .features { grid-template-columns: 1fr; gap: 30px; } h1 { font-size: 2rem; } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <canvas id="bg-canvas"></canvas>
 
+    <!-- Кнопка-облачко для отзыва -->
+    <div class="feedback-bubble" id="feedback-bubble"></div>
+
+    <!-- Контейнер для уведомлений -->
+    <div class="notification-container" id="notification-container"></div>
+
     <div class="container">
         <header>
             <div class="logo">Вайб</div>
-            <div class="status">
-                <div class="status-dot"></div>
-                <span id="clock">00:00:00</span>
+            <div class="header-right">
+                <button class="reviews-btn" id="reviews-btn">Отзывы</button>
+                <!-- Место для кнопки входа / имени пользователя -->
+                <div id="user-menu" style="display: none;" class="user-badge">
+                    <span id="user-name"></span>
+                    <button class="logout-btn" id="logout-btn">⏻</button>
+                </div>
+                <button class="login-btn" id="login-btn">Войти</button>
             </div>
         </header>
 
@@ -145,8 +39,15 @@
             </div>
             <h1 id="main-title"></h1>
             <p class="subtitle" id="main-subtitle"></p>
-            <button class="mic-btn" id="mic-trigger">АКТИВИРОВАТЬ СЛУХ</button>
         </main>
+
+        <!-- Блок последних отзывов -->
+        <section class="latest-reviews">
+            <h2>Последние отзывы</h2>
+            <div class="reviews-grid" id="latest-reviews-grid">
+                <!-- заполняется js -->
+            </div>
+        </section>
 
         <section class="features">
             <div class="card">
@@ -186,183 +87,83 @@
         </footer>
     </div>
 
-    <script>
-        // Часы
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').textContent = now.toTimeString().split(' ')[0];
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+    <!-- Модальные окна -->
+    <div class="modal-overlay" id="modal-overlay"></div>
 
-        // Эффект печати текста
-        const titleText = "Простота. Порядок. Интеллект.";
-        const subText = "Ваш персональный ассистент, созданный для помощи и облегчения жизни. Вайб - сила💪";
-        
-        function typeWriter(element, text, speed, callback) {
-            let i = 0;
-            element.innerHTML = "";
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                } else if (callback) callback();
-            }
-            type();
-        }
+    <!-- Модалка отзывов (все отзывы) -->
+    <div class="modal" id="reviews-modal">
+        <div class="modal-header">
+            <h2>Все отзывы</h2>
+            <button class="modal-close" id="close-reviews">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="reviews-list"></div>
+        </div>
+    </div>
 
-        window.onload = () => {
-            typeWriter(document.getElementById('main-title'), titleText, 50, () => {
-                typeWriter(document.getElementById('main-subtitle'), subText, 30);
-            });
-        };
+    <!-- Модалка написания отзыва -->
+    <div class="modal" id="write-review-modal">
+        <div class="modal-header">
+            <h2>Оставить отзыв</h2>
+            <button class="modal-close" id="close-write-review">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="write-review-form">
+                <div class="star-rating">
+                    <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+                    <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                    <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                    <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                    <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                </div>
+                <textarea id="review-text" placeholder="Ваш отзыв" rows="4" required></textarea>
+                <button type="submit">Отправить</button>
+            </form>
+        </div>
+    </div>
 
-        // Канвас и частицы
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouse = { x: null, y: null };
-        let lastClick = { x: null, y: null, time: 0 };
+    <!-- Модалка входа -->
+    <div class="modal" id="login-modal">
+        <div class="modal-header">
+            <h2>Вход</h2>
+            <button class="modal-close" id="close-login">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Пароль" required>
+                <button type="submit">Войти</button>
+                <button type="button" class="forgot-password" id="forgot-password-btn">Забыли пароль?</button>
+            </form>
+            <p>Нет аккаунта? <a id="switch-to-register" class="switch-link">Зарегистрироваться</a></p>
+        </div>
+    </div>
 
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
+    <!-- Модалка регистрации -->
+    <div class="modal" id="register-modal">
+        <div class="modal-header">
+            <h2>Регистрация</h2>
+            <button class="modal-close" id="close-register">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="register-step1">
+                <form id="register-form-step1">
+                    <input type="text" id="register-name" placeholder="Имя" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="password" id="register-password" placeholder="Пароль" required>
+                    <input type="password" id="register-confirm" placeholder="Подтверждение пароля" required>
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+            </div>
+            <div id="register-step2" style="display: none;">
+                <p>На ваш email отправлен код подтверждения. (Симуляция: код <strong id="display-code"></strong>)</p>
+                <input type="text" id="verification-code" placeholder="Введите код">
+                <button id="verify-code">Подтвердить</button>
+            </div>
+        </div>
+    </div>
 
-        window.addEventListener('click', (e) => {
-            // Ripple эффект
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-            ripple.style.left = `${e.clientX}px`;
-            ripple.style.top = `${e.clientY}px`;
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 800);
-
-            // Данные для подсветки связей
-            lastClick.x = e.clientX;
-            lastClick.y = e.clientY;
-            lastClick.time = Date.now();
-        });
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor() {
-                this.baseX = Math.random() * canvas.width;
-                this.baseY = Math.random() * canvas.height;
-                this.x = this.baseX;
-                this.y = this.baseY;
-                this.speedX = (Math.random() - 0.5) * 0.4;
-                this.speedY = (Math.random() - 0.5) * 0.4;
-                this.size = 2;
-            }
-            update() {
-                if (mouse.x) {
-                    this.x = this.baseX + (mouse.x - canvas.width/2) * 0.03;
-                    this.y = this.baseY + (mouse.y - canvas.height/2) * 0.03;
-                }
-                this.baseX += this.speedX;
-                this.baseY += this.speedY;
-
-                if (this.baseX > canvas.width || this.baseX < 0) this.speedX *= -1;
-                if (this.baseY > canvas.height || this.baseY < 0) this.speedY *= -1;
-            }
-            draw() {
-                ctx.fillStyle = 'rgba(0, 242, 255, 0.4)';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function init() {
-            particles = [];
-            for (let i = 0; i < 75; i++) particles.push(new Particle());
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const now = Date.now();
-            const clickElapsed = now - lastClick.time;
-
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const d = Math.sqrt(dx*dx + dy*dy);
-
-                    if (d < 170) {
-                        let alpha = 0.3 * (1 - d/170); // Увеличена ясность
-                        let lineWidth = 1;
-
-                        if (clickElapsed < 800 && lastClick.x !== null) {
-                            const distToClick = Math.sqrt((particles[i].x - lastClick.x)**2 + (particles[i].y - lastClick.y)**2);
-                            const waveRadius = (clickElapsed / 800) * 600;
-                            if (Math.abs(distToClick - waveRadius) < 60) {
-                                alpha *= 3.5;
-                                lineWidth = 2;
-                            }
-                        }
-
-                        ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
-                        ctx.lineWidth = lineWidth;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        init();
-        animate();
-
-        // Визуализация голоса
-        const micBtn = document.getElementById('mic-trigger');
-        const core = document.getElementById('vibe-core');
-        let audioContext, analyser, dataArray, source;
-
-        micBtn.addEventListener('click', async () => {
-            if (!audioContext) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
-                    analyser.fftSize = 64;
-                    dataArray = new Uint8Array(analyser.frequencyBinCount);
-                    
-                    micBtn.textContent = "СЛУШАЮ...";
-                    micBtn.classList.add('mic-active');
-                    visualize();
-                } catch (err) {
-                    alert("Нужен доступ к микрофону!");
-                }
-            }
-        });
-
-        function visualize() {
-            if (!analyser) return;
-            requestAnimationFrame(visualize);
-            analyser.getByteFrequencyData(dataArray);
-            let sum = 0;
-            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
-            let average = sum / dataArray.length;
-            let scale = 1 + (average / 80); 
-            core.style.transform = `translate(-50%, -50%) scale(${scale})`;
-            core.style.boxShadow = `0 0 ${40 + average*1.5}px rgba(0, 242, 255, ${0.3 + average/150})`;
-        }
-    </script>
+    <!-- Подключаем Firebase и скрипт -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
