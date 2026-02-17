@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
 import { 
     getAuth, 
     createUserWithEmailAndPassword,
@@ -34,7 +33,6 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -61,12 +59,15 @@ let currentUserName = '';
 
 // --- Функция показа уведомлений ---
 function showNotification(message, type = 'info', duration = 4000) {
+    if (!notificationContainer) {
+        console.warn('Notification container not found');
+        return;
+    }
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
     notificationContainer.appendChild(notification);
 
-    // Удаляем через duration
     setTimeout(() => {
         notification.classList.add('fade-out');
         setTimeout(() => {
@@ -247,6 +248,7 @@ function renderLatestReviews(reviews) {
 
 document.getElementById('write-review-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    console.log('Submitting review, currentUser:', currentUser);
     if (!currentUser) {
         showNotification('Необходимо войти', 'error');
         openModal(loginModal);
@@ -259,7 +261,10 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     }
     const rating = parseInt(ratingInput.value);
     const text = document.getElementById('review-text').value.trim();
-    if (!text) return;
+    if (!text) {
+        showNotification('Напишите текст отзыва', 'error');
+        return;
+    }
 
     try {
         await addDoc(collection(db, 'reviews'), {
@@ -271,9 +276,12 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
         });
         showNotification('Отзыв добавлен, спасибо!', 'success');
         document.getElementById('write-review-form').reset();
+        // Сбрасываем выделение звёзд
+        document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
         closeAllModals();
         loadReviews();
     } catch (error) {
+        console.error('Error adding review:', error);
         showNotification('Ошибка: ' + error.message, 'error');
     }
 });
@@ -304,6 +312,7 @@ document.getElementById('register-form-step1').addEventListener('submit', async 
 
         closeAllModals();
     } catch (error) {
+        console.error('Registration error:', error);
         showNotification('Ошибка: ' + error.message, 'error');
     }
 });
@@ -318,6 +327,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         showNotification('Вход выполнен', 'success');
         closeAllModals();
     } catch (error) {
+        console.error('Login error:', error);
         showNotification('Ошибка: ' + error.message, 'error');
     }
 });
@@ -327,6 +337,7 @@ logoutBtn.addEventListener('click', async () => {
         await signOut(auth);
         showNotification('Вы вышли', 'info');
     } catch (error) {
+        console.error('Logout error:', error);
         showNotification('Ошибка: ' + error.message, 'error');
     }
 });
@@ -339,6 +350,7 @@ forgotPasswordBtn.addEventListener('click', () => {
                 showNotification('Письмо для сброса пароля отправлено! Проверьте почту.', 'success');
             })
             .catch((error) => {
+                console.error('Password reset error:', error);
                 showNotification('Ошибка: ' + error.message, 'error');
             });
     }
@@ -351,6 +363,7 @@ loginBtn.addEventListener('click', () => {
 
 // Отслеживание состояния аутентификации
 onAuthStateChanged(auth, async (user) => {
+    console.log('Auth state changed:', user ? user.email : 'null');
     if (user) {
         currentUser = user;
         try {
@@ -359,20 +372,27 @@ onAuthStateChanged(auth, async (user) => {
             if (docSnap.exists()) {
                 currentUserName = docSnap.data().name;
             } else {
+                // Документа нет, используем часть email и создаём документ
                 currentUserName = user.email.split('@')[0];
+                await setDoc(docRef, {
+                    name: currentUserName,
+                    email: user.email,
+                    createdAt: serverTimestamp()
+                });
             }
         } catch (error) {
-            console.error('Ошибка получения имени:', error);
+            console.error('Error fetching user name:', error);
             currentUserName = user.email.split('@')[0];
         }
-        userMenu.style.display = 'flex';
-        userNameSpan.textContent = currentUserName;
-        loginBtn.style.display = 'none';
+        // Обновляем UI
+        if (userMenu) userMenu.style.display = 'flex';
+        if (userNameSpan) userNameSpan.textContent = currentUserName;
+        if (loginBtn) loginBtn.style.display = 'none';
     } else {
         currentUser = null;
         currentUserName = '';
-        userMenu.style.display = 'none';
-        loginBtn.style.display = 'block';
+        if (userMenu) userMenu.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'block';
     }
 });
 
@@ -383,6 +403,7 @@ function closeAllModals() {
 }
 
 function openModal(modal) {
+    if (!modal) return;
     closeAllModals();
     modalOverlay.style.display = 'flex';
     modal.classList.add('show');
@@ -394,6 +415,7 @@ reviewsBtn.addEventListener('click', () => {
 });
 
 feedbackBubble.addEventListener('click', () => {
+    console.log('Bubble clicked, currentUser:', currentUser);
     if (!currentUser) {
         openModal(loginModal);
     } else {
