@@ -10,7 +10,7 @@
 <body>
 
     <canvas id="bg-canvas"></canvas>
-
+    <script src="background.js" defer></script>
     <!-- Кнопка-облачко для отзыва -->
     <div class="feedback-bubble" id="feedback-bubble"></div>
 
@@ -23,10 +23,12 @@
             <div class="header-right">
                 <a href="pricing.html" class="reviews-btn">Тарифы</a>
                 <button class="reviews-btn" id="reviews-btn">Отзывы</button>
-                <!-- Место для кнопки входа / имени пользователя -->
-                <div id="user-menu" style="display: none;" class="user-badge">
-                    <span id="user-name"></span>
-                    <button class="logout-btn" id="logout-btn">⏻</button>
+                <div id="user-avatar-container" style="display: none;">
+                    <img id="user-avatar-img" src="" alt="avatar" class="user-avatar">
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        <a href="profile.html" class="dropdown-item">Профиль</a>
+                        <button class="dropdown-item" id="dropdown-logout">Выйти</button>
+                    </div>
                 </div>
                 <button class="login-btn" id="login-btn">Войти</button>
             </div>
@@ -38,8 +40,8 @@
                 <div class="wave"></div>
                 <div class="core" id="vibe-core"></div>
             </div>
-            <h1 id="main-title"></h1>
-            <p class="subtitle" id="main-subtitle"></p>
+            <h1 id="main-title">Простота. Порядок. Интеллект.</h1>
+            <p class="subtitle" id="main-subtitle">Помощник который автоматизирует большинство твоих рутиных действий от открытия ютуба, до больших сценариев по типу "Включи фильм"</p>
         </main>
 
         <!-- Блок последних отзывов -->

@@ -21,7 +21,6 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-// Ваш конфиг Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyB2h26sAkkhHwUJdx6eeVxz6fY9qVG8bZM",
     authDomain: "vibedb-71371.firebaseapp.com",
@@ -47,41 +46,38 @@ const registerModal = document.getElementById('register-modal');
 const closeButtons = document.querySelectorAll('.modal-close');
 const reviewsList = document.getElementById('reviews-list');
 const latestGrid = document.getElementById('latest-reviews-grid');
-const userMenu = document.getElementById('user-menu');
-const userNameSpan = document.getElementById('user-name');
-const logoutBtn = document.getElementById('logout-btn');
 const loginBtn = document.getElementById('login-btn');
 const forgotPasswordBtn = document.getElementById('forgot-password-btn');
 const notificationContainer = document.getElementById('notification-container');
 
+// Новые элементы для аватарки и меню
+const userAvatarContainer = document.getElementById('user-avatar-container');
+const userAvatarImg = document.getElementById('user-avatar-img');
+const dropdownMenu = document.getElementById('dropdown-menu');
+const dropdownLogout = document.getElementById('dropdown-logout');
+
 let currentUser = null;
 let currentUserName = '';
+let currentUserAvatar = null;
 
-// --- Функция показа уведомлений ---
+// --- Уведомления ---
 function showNotification(message, type = 'info', duration = 4000) {
-    if (!notificationContainer) {
-        console.warn('Notification container not found');
-        return;
-    }
+    if (!notificationContainer) return;
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
     notificationContainer.appendChild(notification);
-
     setTimeout(() => {
         notification.classList.add('fade-out');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, duration);
 }
 
-// --- Печать текста ---
-const titleText = "Простота. Порядок. Интеллект.";
-const subText = "Ваш персональный ассистент, созданный для помощи и облегчения жизни. Вайб - сила💪";
-function typeWriter(element, text, speed, callback) {
+// --- Анимация печати текста ---
+function typeWriter(element, text, speed = 50, callback) {
+    if (!element) return;
     let i = 0;
-    element.innerHTML = "";
+    element.innerHTML = '';
     function type() {
         if (i < text.length) {
             element.innerHTML += text.charAt(i);
@@ -92,98 +88,7 @@ function typeWriter(element, text, speed, callback) {
     type();
 }
 
-// --- Канвас (частицы) ---
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let mouse = { x: null, y: null };
-let lastClick = { x: null, y: null, time: 0 };
-
-window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
-window.addEventListener('click', (e) => {
-    const ripple = document.createElement('div');
-    ripple.className = 'ripple';
-    ripple.style.left = `${e.clientX}px`;
-    ripple.style.top = `${e.clientY}px`;
-    document.body.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 800);
-    lastClick.x = e.clientX; lastClick.y = e.clientY; lastClick.time = Date.now();
-});
-
-function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-
-class Particle {
-    constructor() {
-        this.baseX = Math.random() * canvas.width;
-        this.baseY = Math.random() * canvas.height;
-        this.x = this.baseX; this.y = this.baseY;
-        this.speedX = (Math.random() - 0.5) * 0.4;
-        this.speedY = (Math.random() - 0.5) * 0.4;
-        this.size = 2;
-    }
-    update() {
-        if (mouse.x) {
-            this.x = this.baseX + (mouse.x - canvas.width/2) * 0.03;
-            this.y = this.baseY + (mouse.y - canvas.height/2) * 0.03;
-        }
-        this.baseX += this.speedX;
-        this.baseY += this.speedY;
-        if (this.baseX > canvas.width || this.baseX < 0) this.speedX *= -1;
-        if (this.baseY > canvas.height || this.baseY < 0) this.speedY *= -1;
-    }
-    draw() {
-        ctx.fillStyle = 'rgba(0, 242, 255, 0.4)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-function initParticles() {
-    particles = [];
-    for (let i = 0; i < 75; i++) particles.push(new Particle());
-}
-
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const now = Date.now();
-    const clickElapsed = now - lastClick.time;
-    for (let i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
-        for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const d = Math.sqrt(dx*dx + dy*dy);
-            if (d < 170) {
-                let alpha = 0.3 * (1 - d/170);
-                let lineWidth = 1;
-                if (clickElapsed < 800 && lastClick.x !== null) {
-                    const distToClick = Math.sqrt((particles[i].x - lastClick.x)**2 + (particles[i].y - lastClick.y)**2);
-                    const waveRadius = (clickElapsed / 800) * 600;
-                    if (Math.abs(distToClick - waveRadius) < 60) {
-                        alpha *= 3.5;
-                        lineWidth = 2;
-                    }
-                }
-                ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
-                ctx.lineWidth = lineWidth;
-                ctx.beginPath();
-                ctx.moveTo(particles[i].x, particles[i].y);
-                ctx.lineTo(particles[j].x, particles[j].y);
-                ctx.stroke();
-            }
-        }
-    }
-    requestAnimationFrame(animate);
-}
-initParticles();
-animate();
-
-// --- Функции работы с Firebase ---
-
+// --- Загрузка отзывов ---
 async function loadReviews() {
     try {
         const q = query(collection(db, 'reviews'), orderBy('date', 'desc'));
@@ -200,55 +105,63 @@ async function loadReviews() {
     }
 }
 
-function renderReviewsList(reviews) {
+// --- Рендер всех отзывов в модалке ---
+async function renderReviewsList(reviews) {
     if (reviews.length === 0) {
-        reviewsList.innerHTML = '<p class="text-dim">Пока нет отзывов. Будьте первым!</p>';
+        reviewsList.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Пока нет отзывов. Будьте первым!</p>';
         return;
     }
     let html = '';
-    reviews.forEach(r => {
+    for (const r of reviews) {
         const date = r.date ? new Date(r.date.toDate()).toLocaleString() : 'только что';
+        const avatarHtml = r.userAvatarUrl
+            ? `<img src="${r.userAvatarUrl}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">`
+            : `<div class="review-avatar">${r.userName ? r.userName.charAt(0).toUpperCase() : '?'}</div>`;
         html += `
-            <div class="review-item">
-                <div class="review-header">
-                    <span>${r.userName}</span>
-                    <span class="review-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+            <div style="border-bottom:1px solid var(--border); padding:24px 0;">
+                <div style="display:flex; gap:15px; align-items:center; margin-bottom:12px;">
+                    ${avatarHtml}
+                    <div>
+                        <div style="font-weight:600; font-size:1.1rem;">${r.userName}</div>
+                    </div>
                 </div>
-                <div class="review-text">${r.text}</div>
-                <div class="review-date">${date}</div>
+                <div style="color:#fbbf24; font-size:1rem; letter-spacing:2px; margin-bottom:12px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                <p style="color:var(--text-secondary); font-size:1rem; line-height:1.6;">${r.text}</p>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">${date}</div>
             </div>
         `;
-    });
+    }
     reviewsList.innerHTML = html;
 }
 
-function renderLatestReviews(reviews) {
+// --- Рендер трёх последних отзывов на главной ---
+async function renderLatestReviews(reviews) {
     if (reviews.length === 0) {
-        latestGrid.innerHTML = '<div class="no-reviews-message">Пока нет отзывов. Будьте первым!</div>';
+        latestGrid.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Пока нет отзывов.</div>';
         return;
     }
     let html = '';
-    reviews.forEach(r => {
-        const date = r.date ? new Date(r.date.toDate()).toLocaleDateString() : 'только что';
+    for (const r of reviews) {
+        const avatarHtml = r.userAvatarUrl
+            ? `<img src="${r.userAvatarUrl}" alt="avatar" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">`
+            : `<div class="review-avatar">${r.userName ? r.userName.charAt(0).toUpperCase() : '?'}</div>`;
         html += `
             <div class="review-card">
-                <div class="review-card-header">
-                    <span class="review-card-name">${r.userName}</span>
-                    <span class="review-card-rating">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                <div class="review-meta">
+                    ${avatarHtml}
+                    <div class="review-author">${r.userName}</div>
                 </div>
-                <div class="review-card-text">${r.text}</div>
-                <div class="review-card-date">${date}</div>
+                <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+                <p class="review-text">${r.text}</p>
             </div>
         `;
-    });
+    }
     latestGrid.innerHTML = html;
 }
 
-// --- Обработчики событий ---
-
+// --- Обработчик отправки отзыва ---
 document.getElementById('write-review-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    console.log('Submitting review, currentUser:', currentUser);
     if (!currentUser) {
         showNotification('Необходимо войти', 'error');
         openModal(loginModal);
@@ -267,16 +180,20 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     }
 
     try {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const userAvatarUrl = userDoc.exists() ? userDoc.data().avatarUrl : null;
+
         await addDoc(collection(db, 'reviews'), {
             userName: currentUserName || currentUser.email.split('@')[0],
             userEmail: currentUser.email,
+            userId: currentUser.uid,
+            userAvatarUrl: userAvatarUrl,
             rating: rating,
             text: text,
             date: serverTimestamp()
         });
         showNotification('Отзыв добавлен, спасибо!', 'success');
         document.getElementById('write-review-form').reset();
-        // Сбрасываем выделение звёзд
         document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
         closeAllModals();
         loadReviews();
@@ -286,6 +203,7 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
     }
 });
 
+// --- Регистрация ---
 document.getElementById('register-form-step1').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('register-name').value.trim();
@@ -317,6 +235,7 @@ document.getElementById('register-form-step1').addEventListener('submit', async 
     }
 });
 
+// --- Вход ---
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -332,47 +251,31 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 });
 
-logoutBtn.addEventListener('click', async () => {
-    try {
-        await signOut(auth);
-        showNotification('Вы вышли', 'info');
-    } catch (error) {
-        console.error('Logout error:', error);
-        showNotification('Ошибка: ' + error.message, 'error');
-    }
-});
-
+// --- Забыли пароль ---
 forgotPasswordBtn.addEventListener('click', () => {
     const email = prompt('Введите ваш email для сброса пароля:');
     if (email) {
         sendPasswordResetEmail(auth, email)
-            .then(() => {
-                showNotification('Письмо для сброса пароля отправлено! Проверьте почту.', 'success');
-            })
-            .catch((error) => {
-                console.error('Password reset error:', error);
-                showNotification('Ошибка: ' + error.message, 'error');
-            });
+            .then(() => showNotification('Письмо для сброса пароля отправлено!', 'success'))
+            .catch((error) => showNotification('Ошибка: ' + error.message, 'error'));
     }
 });
 
-// Кнопка "Войти"
-loginBtn.addEventListener('click', () => {
-    openModal(loginModal);
-});
+// --- Кнопка "Войти" ---
+loginBtn.addEventListener('click', () => openModal(loginModal));
 
-// Отслеживание состояния аутентификации
+// --- Отслеживание аутентификации ---
 onAuthStateChanged(auth, async (user) => {
-    console.log('Auth state changed:', user ? user.email : 'null');
     if (user) {
         currentUser = user;
         try {
             const docRef = doc(db, 'users', user.uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                currentUserName = docSnap.data().name;
+                const data = docSnap.data();
+                currentUserName = data.name;
+                currentUserAvatar = data.avatarUrl || null;
             } else {
-                // Документа нет, используем часть email и создаём документ
                 currentUserName = user.email.split('@')[0];
                 await setDoc(docRef, {
                     name: currentUserName,
@@ -381,18 +284,39 @@ onAuthStateChanged(auth, async (user) => {
                 });
             }
         } catch (error) {
-            console.error('Error fetching user name:', error);
+            console.error('Error fetching user data:', error);
             currentUserName = user.email.split('@')[0];
         }
-        // Обновляем UI
-        if (userMenu) userMenu.style.display = 'flex';
-        if (userNameSpan) userNameSpan.textContent = currentUserName;
-        if (loginBtn) loginBtn.style.display = 'none';
+
+        // Показываем аватарку, скрываем кнопку входа
+        userAvatarContainer.style.display = 'inline-block';
+        loginBtn.style.display = 'none';
+
+        // Устанавливаем аватарку или заглушку
+        if (currentUserAvatar) {
+            userAvatarImg.src = currentUserAvatar;
+        } else {
+            // Генерация заглушки (первая буква имени в кружке)
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#00f2ff'; // цвет акцента
+            ctx.beginPath();
+            ctx.arc(20, 20, 20, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = '20px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(currentUserName.charAt(0).toUpperCase(), 20, 20);
+            userAvatarImg.src = canvas.toDataURL();
+        }
     } else {
         currentUser = null;
         currentUserName = '';
-        if (userMenu) userMenu.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'block';
+        userAvatarContainer.style.display = 'none';
+        loginBtn.style.display = 'block';
     }
 });
 
@@ -403,40 +327,65 @@ function closeAllModals() {
 }
 
 function openModal(modal) {
-    if (!modal) return;
     closeAllModals();
     modalOverlay.style.display = 'flex';
     modal.classList.add('show');
 }
 
+// --- Обработчики кнопок ---
 reviewsBtn.addEventListener('click', () => {
     loadReviews();
     openModal(reviewsModal);
 });
 
 feedbackBubble.addEventListener('click', () => {
-    console.log('Bubble clicked, currentUser:', currentUser);
-    if (!currentUser) {
-        openModal(loginModal);
-    } else {
-        openModal(writeReviewModal);
-    }
+    if (!currentUser) openModal(loginModal);
+    else openModal(writeReviewModal);
 });
 
-closeButtons.forEach(btn => {
-    btn.addEventListener('click', closeAllModals);
-});
-
+closeButtons.forEach(btn => btn.addEventListener('click', closeAllModals));
 modalOverlay.addEventListener('click', closeAllModals);
 
 document.getElementById('switch-to-register').addEventListener('click', () => {
+    closeAllModals();
     openModal(registerModal);
 });
 
-// При загрузке страницы
-window.onload = () => {
-    typeWriter(document.getElementById('main-title'), titleText, 50, () => {
-        typeWriter(document.getElementById('main-subtitle'), subText, 30);
-    });
+// --- Обработчики меню аватарки ---
+userAvatarImg.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdownMenu.classList.toggle('show');
+});
+
+document.addEventListener('click', (e) => {
+    if (!userAvatarContainer.contains(e.target)) {
+        dropdownMenu.classList.remove('show');
+    }
+});
+
+dropdownLogout.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        showNotification('Вы вышли', 'info');
+        dropdownMenu.classList.remove('show');
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message, 'error');
+    }
+});
+
+// --- Анимация при загрузке ---
+window.addEventListener('load', () => {
+    const titleEl = document.getElementById('main-title');
+    const subtitleEl = document.getElementById('main-subtitle');
+    
+    // Анимируем подзаголовок
+    if (subtitleEl) {
+        const originalText = subtitleEl.textContent;
+        typeWriter(subtitleEl, originalText, 30);
+    }
+    const core = document.getElementById('vibe-core');
+    if (core) {
+        core.style.animation = 'orb-breathe 4s ease-in-out infinite';
+    }
     loadReviews();
-};
+});

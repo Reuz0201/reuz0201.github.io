@@ -1,12 +1,21 @@
 :root {
     --bg-color: #0f1113;
     --accent-color: #00f2ff;
+    --accent-2: #7c4dff; /* добавлено для градиентов */
     --text-main: #f5f5f7;
     --text-dim: #86868b;
+    --text-secondary: #b0b3b8; /* добавлено */
+    --text-muted: #6c6f77;      /* добавлено */
     --glass-border: rgba(255, 255, 255, 0.08);
     --modal-bg: #1a1d21;
     --overlay-bg: rgba(0,0,0,0.7);
     --card-bg: rgba(0, 242, 255, 0.05);
+    --surface: rgba(255,255,255,0.04);      /* для новых карточек */
+    --surface-hover: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);        /* общий border */
+    --border-accent: rgba(0,242,255,0.3);
+    --radius: 16px;                          /* скругление */
+    --radius-lg: 24px;
     --success-bg: rgba(0, 255, 0, 0.2);
     --error-bg: rgba(255, 0, 0, 0.2);
     --info-bg: rgba(0, 242, 255, 0.2);
@@ -259,7 +268,7 @@ h1 {
     filter: grayscale(100%);
 }
 
-/* Карточки последних отзывов на главной */
+/* Карточки последних отзывов на главной (увеличенные, новый дизайн) */
 .latest-reviews {
     margin: 60px 0 80px;
 }
@@ -279,55 +288,70 @@ h1 {
     gap: 20px;
 }
 
+/* Новая стилизация карточек (увеличенная, с аватаркой, звёздами) */
 .review-card {
-    background: var(--card-bg);
-    border: 1px solid rgba(0, 242, 255, 0.3);
-    border-radius: 20px;
-    padding: 20px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
     transition: all 0.25s ease;
+    backdrop-filter: blur(12px);
 }
 
 .review-card:hover {
-    box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
-    transform: translateY(-5px);
-    border-color: var(--accent-color);
+    border-color: var(--border-accent);
+    background: var(--surface-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
 }
 
-.review-card-header {
+.review-meta {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
     margin-bottom: 12px;
-    font-weight: 500;
 }
 
-.review-card-name {
-    color: var(--accent-color);
+.review-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), var(--accent-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.review-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.review-author {
+    font-family: 'Syne', sans-serif;
     font-size: 1.1rem;
-}
-
-.review-card-rating {
-    color: gold;
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-}
-
-.review-card-text {
+    font-weight: 600;
     color: var(--text-main);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 12px;
-    word-break: break-word;
 }
 
-.review-card-date {
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    opacity: 0.7;
-    text-align: right;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 8px;
+.review-stars {
+    color: #fbbf24;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    margin: 8px 0 12px 0;
+}
+
+.review-text {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
 .no-reviews-message {
@@ -341,6 +365,7 @@ h1 {
     backdrop-filter: blur(4px);
 }
 
+/* Блоки возможностей (features) */
 .features { 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
@@ -420,7 +445,7 @@ footer {
     color: var(--accent-color); 
 }
 
-/* Модальные окна с анимацией */
+/* Модальные окна */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -502,19 +527,10 @@ footer {
     gap: 20px;
 }
 
-/* Расстояние между полями ввода */
 .modal-body input,
 .modal-body select,
 .modal-body textarea {
     margin-bottom: 15px;
-}
-
-/* Запрет изменения размера textarea */
-.modal-body textarea {
-    resize: none;
-}
-
-input, select, textarea, button {
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
@@ -525,13 +541,21 @@ input, select, textarea, button {
     width: 100%;
 }
 
+.modal-body textarea {
+    resize: none;
+}
+
 button {
     background: transparent;
     color: var(--accent-color);
-    border-color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 16px;
+    padding: 12px 16px;
     cursor: pointer;
     font-weight: 500;
     transition: 0.2s;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
 }
 
 button:hover {
@@ -560,11 +584,6 @@ button:hover {
 .star-rating label:hover,
 .star-rating label:hover ~ label,
 .star-rating input:checked ~ label {
-    color: gold;
-}
-
-.star-rating input:checked + label,
-.star-rating input:checked + label ~ label {
     color: gold;
 }
 
@@ -627,6 +646,7 @@ button:hover {
     margin: 10px 0;
 }
 
+/* Адаптивность */
 @media (max-width: 768px) { 
     .features { grid-template-columns: 1fr; gap: 30px; } 
     h1 { font-size: 2rem; } 
@@ -636,6 +656,7 @@ button:hover {
     .feedback-bubble { bottom: 20px; right: 20px; }
 }
 
+/* Стили для страницы тарифов */
 .pricing-section {
     margin: 60px 0 80px;
 }
@@ -693,4 +714,129 @@ button:hover {
     .pricing-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Стили для админ-панели */
+.subscription-option {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 1rem;
+}
+.subscription-option:hover {
+    background: rgba(0,242,255,0.2);
+    border-color: var(--accent-color);
+}
+
+.admin-user-card {
+    transition: background 0.2s;
+}
+.admin-user-card:hover {
+    background: rgba(0,242,255,0.05);
+}
+.admin-plan-select, .admin-expires-input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    padding: 8px;
+    border-radius: 8px;
+}
+.admin-save-btn {
+    background: var(--accent-color);
+    color: #000;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.admin-save-btn:hover {
+    background: #00c4d4;
+}
+
+/* Аватарка пользователя */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid var(--accent-color);
+    transition: transform 0.2s;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* Контейнер для аватарки и меню */
+#user-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Выпадающее меню */
+.dropdown-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: var(--modal-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px 0;
+    min-width: 150px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+}
+
+/* Элементы меню */
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: var(--surface-hover);
+    color: var(--accent-color);
+}
+
+/* Отступ для поля "Подписка" */
+.profile-field-subscription {
+    margin-top: 12px; /* регулируйте значение по вкусу */
+}
+
+/* Стиль для символа бесконечности (если нужно) */
+.profile-value .subscription-badge {
+    font-size: 1.3rem;
+    margin-top: -50px;
+}
+
+.profile-field-subscription .profile-value {
+    font-size: 1rem; /* или другой размер */
 }
