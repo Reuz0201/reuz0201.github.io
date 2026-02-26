@@ -1,6 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { auth, db, showNotification, getPlaceholderDataURL, toggleDropdownMenu, animateLoginTransition, animateLogoutTransition } from './firebase.js';
 import { 
-    getAuth, 
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
@@ -9,7 +8,6 @@ import {
     sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { 
-    getFirestore, 
     collection,
     addDoc,
     getDocs,
@@ -18,39 +16,24 @@ import {
     doc,
     setDoc,
     getDoc,
-    serverTimestamp 
+    serverTimestamp,
+    onSnapshot,
+    limit,
+    where
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyB2h26sAkkhHwUJdx6eeVxz6fY9qVG8bZM",
-    authDomain: "vibedb-71371.firebaseapp.com",
-    projectId: "vibedb-71371",
-    storageBucket: "vibedb-71371.firebasestorage.app",
-    messagingSenderId: "893073137943",
-    appId: "1:893073137943:web:a228669285bfa5c6485752",
-    measurementId: "G-BP4CLBJB55"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
 // DOM элементы
-const reviewsBtn = document.getElementById('reviews-btn');
 const feedbackBubble = document.getElementById('feedback-bubble');
 const modalOverlay = document.getElementById('modal-overlay');
-const reviewsModal = document.getElementById('reviews-modal');
 const writeReviewModal = document.getElementById('write-review-modal');
 const loginModal = document.getElementById('login-modal');
 const registerModal = document.getElementById('register-modal');
 const closeButtons = document.querySelectorAll('.modal-close');
-const reviewsList = document.getElementById('reviews-list');
 const latestGrid = document.getElementById('latest-reviews-grid');
 const loginBtn = document.getElementById('login-btn');
 const forgotPasswordBtn = document.getElementById('forgot-password-btn');
 const notificationContainer = document.getElementById('notification-container');
 
-// Новые элементы для аватарки и меню
 const userAvatarContainer = document.getElementById('user-avatar-container');
 const userAvatarImg = document.getElementById('user-avatar-img');
 const dropdownMenu = document.getElementById('dropdown-menu');
@@ -60,18 +43,56 @@ let currentUser = null;
 let currentUserName = '';
 let currentUserAvatar = null;
 
-// --- Уведомления ---
-function showNotification(message, type = 'info', duration = 4000) {
-    if (!notificationContainer) return;
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notificationContainer.appendChild(notification);
-    setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => notification.remove(), 300);
-    }, duration);
+const REVIEW_MAX_LENGTH = 100;
+const reviewCache = {};
+
+// --- Попап полного текста отзыва ---
+const fullPopup = document.createElement('div');
+fullPopup.style.cssText = `
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(0,0,0,0.75); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+`;
+fullPopup.innerHTML = `
+    <div style="background:var(--modal-bg); border:1px solid var(--glass-border);
+        border-radius:24px; padding:32px; max-width:560px; width:92%;
+        max-height:80vh; overflow-y:auto; position:relative;">
+        <button id="fp-close" style="position:absolute;top:14px;right:16px;background:none;
+            border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+        <div id="fp-meta" style="display:flex;gap:14px;align-items:center;margin-bottom:14px;"></div>
+        <div id="fp-stars" style="color:#fbbf24;font-size:1rem;letter-spacing:2px;margin-bottom:14px;"></div>
+        <p id="fp-text" style="color:var(--text-secondary);font-size:1rem;line-height:1.7;margin:0;"></p>
+        <div id="fp-date" style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;"></div>
+    </div>
+`;
+document.body.appendChild(fullPopup);
+document.getElementById('fp-close').addEventListener('click', () => fullPopup.style.display = 'none');
+fullPopup.addEventListener('click', e => { if (e.target === fullPopup) fullPopup.style.display = 'none'; });
+
+function openFullPopup(r) {
+    const date = r.date ? new Date(r.date.toDate()).toLocaleString() : 'только что';
+    const avatarHtml = r.userAvatarUrl
+        ? `<img src="${r.userAvatarUrl}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">`
+        : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#00f2ff,#7c4dff);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;">${r.userName?.charAt(0).toUpperCase() || '?'}</div>`;
+    document.getElementById('fp-meta').innerHTML = `${avatarHtml}<span style="font-weight:600;font-size:1.1rem;">${r.userName}</span>`;
+    document.getElementById('fp-stars').textContent = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    document.getElementById('fp-text').textContent = r.text;
+    document.getElementById('fp-date').textContent = date;
+    fullPopup.style.display = 'flex';
 }
+
+// // --- Уведомления ---
+// function showNotification(message, type = 'info', duration = 4000) {
+//     if (!notificationContainer) return;
+//     const notification = document.createElement('div');
+//     notification.className = `notification ${type}`;
+//     notification.textContent = message;
+//     notificationContainer.appendChild(notification);
+//     setTimeout(() => {
+//         notification.classList.add('fade-out');
+//         setTimeout(() => notification.remove(), 300);
+//     }, duration);
+// }
 
 // --- Анимация печати текста ---
 function typeWriter(element, text, speed = 50, callback) {
@@ -88,63 +109,123 @@ function typeWriter(element, text, speed = 50, callback) {
     type();
 }
 
-// --- Загрузка отзывов ---
-async function loadReviews() {
-    try {
-        const q = query(collection(db, 'reviews'), orderBy('date', 'desc'));
-        const querySnapshot = await getDocs(q);
+// --- Загрузка отзывов с real-time обновлением ---
+let lastReviews = [];
+let totalReviewCount = 0;
+
+function subscribeToReviews() {
+    // Подписка на последние 3 для отображения
+    const q = query(collection(db, 'reviews'), orderBy('date', 'desc'), limit(3));
+    onSnapshot(q, (snapshot) => {
         const reviews = [];
-        querySnapshot.forEach((doc) => {
+        snapshot.forEach((doc) => {
             reviews.push({ id: doc.id, ...doc.data() });
         });
-        renderReviewsList(reviews);
-        renderLatestReviews(reviews.slice(0, 3));
-    } catch (error) {
-        console.error('Ошибка загрузки отзывов:', error);
-        showNotification('Ошибка загрузки отзывов', 'error');
-    }
+        animateReviewUpdate(reviews);
+        lastReviews = reviews;
+    });
+
+    // Отдельная подписка на счётчик (только metadata)
+    onSnapshot(collection(db, 'reviews'), (snapshot) => {
+        const count = snapshot.size;
+        if (window.updateReviewCounter) window.updateReviewCounter(count);
+        totalReviewCount = count;
+    });
 }
 
-// --- Рендер всех отзывов в модалке ---
-async function renderReviewsList(reviews) {
-    if (reviews.length === 0) {
-        reviewsList.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Пока нет отзывов. Будьте первым!</p>';
+// --- Анимация обновления карточек (ПЛАВНАЯ: новая слева, старые сдвиг) ---
+function animateReviewUpdate(newReviews) {
+    if (!latestGrid) return;
+    
+    // Если нет старых отзывов, просто рендерим
+    if (lastReviews.length === 0) {
+        renderLatestReviews(newReviews);
+        lastReviews = newReviews;
         return;
     }
-    let html = '';
-    for (const r of reviews) {
-        const date = r.date ? new Date(r.date.toDate()).toLocaleString() : 'только что';
-        const avatarHtml = r.userAvatarUrl
-            ? `<img src="${r.userAvatarUrl}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">`
-            : `<div class="review-avatar">${r.userName ? r.userName.charAt(0).toUpperCase() : '?'}</div>`;
-        html += `
-            <div style="border-bottom:1px solid var(--border); padding:24px 0;">
-                <div style="display:flex; gap:15px; align-items:center; margin-bottom:12px;">
-                    ${avatarHtml}
-                    <div>
-                        <div style="font-weight:600; font-size:1.1rem;">${r.userName}</div>
-                    </div>
-                </div>
-                <div style="color:#fbbf24; font-size:1rem; letter-spacing:2px; margin-bottom:12px;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                <p style="color:var(--text-secondary); font-size:1rem; line-height:1.6;">${r.text}</p>
-                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:8px;">${date}</div>
-            </div>
-        `;
+    
+    // Находим новый отзыв (которого не было в lastReviews)
+    const newReview = newReviews.find(r => !lastReviews.some(lr => lr.id === r.id));
+    
+    if (newReview) {
+        const oldCards = Array.from(latestGrid.children);
+        
+        // Этап 1: старые карточки уезжают вправо, последняя затухает
+        oldCards.forEach((card, index) => {
+            if (!card || !card.style) return;
+            card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+            card.style.transform = 'translateX(108%)';
+            if (index === oldCards.length - 1) {
+                card.style.opacity = '0';
+            }
+        });
+        
+        // Этап 2: ждём окончания (500 мс)
+        setTimeout(() => {
+            // Рендерим новые
+            renderLatestReviews(newReviews);
+            
+            const newCards = Array.from(latestGrid.children);
+            
+            // Этап 3: готовим новую первую карточку (выезжает слева)
+            // и сразу делаем остальные видимыми на своих местах
+            newCards.forEach((card, i) => {
+                if (!card || !card.style) return;
+                card.style.transition = 'none'; // убираем transition на момент установки
+                if (i === 0) {
+                    // Первая карточка (новая) будет выезжать слева
+                    card.style.transform = 'translateX(-33%)';
+                    card.style.opacity = '0';
+                } else {
+                    // Остальные сразу на своих местах
+                    card.style.transform = '';
+                    card.style.opacity = '1';
+                }
+            });
+            
+            // force reflow
+            void latestGrid.offsetHeight;
+            
+            // Этап 4: запускаем анимацию для первой карточки (выезд справа налево?)
+            // По сути она должна приехать с -33% до 0
+            if (newCards[0]) {
+                newCards[0].style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+                newCards[0].style.transform = '';
+                newCards[0].style.opacity = '1';
+            }
+            
+            // Для остальных карточек ничего не делаем, они уже видны.
+            
+            lastReviews = newReviews;
+        }, 500);
+        
+    } else {
+        renderLatestReviews(newReviews);
+        lastReviews = newReviews;
     }
-    reviewsList.innerHTML = html;
 }
 
-// --- Рендер трёх последних отзывов на главной ---
-async function renderLatestReviews(reviews) {
+// --- Рендер трёх последних отзывов ---
+function renderLatestReviews(reviews) {
+    if (!latestGrid) return;
     if (reviews.length === 0) {
         latestGrid.innerHTML = '<div style="color:var(--text-muted); text-align:center;">Пока нет отзывов.</div>';
         return;
     }
+    
     let html = '';
     for (const r of reviews) {
+        reviewCache[r.id] = r;
         const avatarHtml = r.userAvatarUrl
             ? `<img src="${r.userAvatarUrl}" alt="avatar" style="width:48px; height:48px; border-radius:50%; object-fit:cover;">`
             : `<div class="review-avatar">${r.userName ? r.userName.charAt(0).toUpperCase() : '?'}</div>`;
+
+        const isLong = r.text.length > REVIEW_MAX_LENGTH;
+        const displayText = isLong ? r.text.slice(0, REVIEW_MAX_LENGTH) + '\u2026' : r.text;
+        const readMore = isLong
+            ? `<button class="rv-read-more" data-id="${r.id}" style="background:none;border:none;color:var(--accent-color);font-size:0.85rem;cursor:pointer;padding:0;margin-top:6px;text-decoration:underline;font-family:inherit;display:block;">читать далее</button>`
+            : '';
+
         html += `
             <div class="review-card">
                 <div class="review-meta">
@@ -152,12 +233,24 @@ async function renderLatestReviews(reviews) {
                     <div class="review-author">${r.userName}</div>
                 </div>
                 <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
-                <p class="review-text">${r.text}</p>
+                <p class="review-text">${displayText}</p>
+                ${readMore}
             </div>
         `;
     }
     latestGrid.innerHTML = html;
+    
+    // Добавляем обработчики для кнопок "читать далее"
+    latestGrid.querySelectorAll('.rv-read-more').forEach(btn => {
+        btn.addEventListener('click', e => openFullPopup(reviewCache[e.target.dataset.id]));
+    });
 }
+
+// --- Счётчик символов в форме отзыва ---
+document.getElementById('review-text')?.addEventListener('input', e => {
+    const counter = document.getElementById('review-char-count');
+    if (counter) counter.textContent = e.target.value.length;
+});
 
 // --- Обработчик отправки отзыва ---
 document.getElementById('write-review-form').addEventListener('submit', async (e) => {
@@ -179,7 +272,19 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
     try {
+        // Проверка дублей
+        const existingQ = query(collection(db, 'reviews'), where('userId', '==', currentUser.uid));
+        const existingSnap = await getDocs(existingQ);
+        if (!existingSnap.empty) {
+            showNotification('Вы уже оставили отзыв. Его можно отредактировать на странице отзывов.', 'error', 6000);
+            return;
+        }
+
         const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
         const userAvatarUrl = userDoc.exists() ? userDoc.data().avatarUrl : null;
 
@@ -196,10 +301,12 @@ document.getElementById('write-review-form').addEventListener('submit', async (e
         document.getElementById('write-review-form').reset();
         document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
         closeAllModals();
-        loadReviews();
     } catch (error) {
         console.error('Error adding review:', error);
         showNotification('Ошибка: ' + error.message, 'error');
+    } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
     }
 });
 
@@ -242,7 +349,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const password = document.getElementById('login-password').value;
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (!cred.user.emailVerified) {
+            await signOut(auth);
+            showNotification('Email не подтверждён. Проверьте папку «Спам».', 'error', 8000);
+            return;
+        }
         showNotification('Вход выполнен', 'success');
         closeAllModals();
     } catch (error) {
@@ -288,35 +400,18 @@ onAuthStateChanged(auth, async (user) => {
             currentUserName = user.email.split('@')[0];
         }
 
-        // Показываем аватарку, скрываем кнопку входа
-        userAvatarContainer.style.display = 'inline-block';
+        animateLoginTransition(loginBtn, userAvatarContainer, userAvatarImg);
         loginBtn.style.display = 'none';
 
-        // Устанавливаем аватарку или заглушку
         if (currentUserAvatar) {
             userAvatarImg.src = currentUserAvatar;
         } else {
-            // Генерация заглушки (первая буква имени в кружке)
-            const canvas = document.createElement('canvas');
-            canvas.width = 40;
-            canvas.height = 40;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#00f2ff'; // цвет акцента
-            ctx.beginPath();
-            ctx.arc(20, 20, 20, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = '20px Inter';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(currentUserName.charAt(0).toUpperCase(), 20, 20);
-            userAvatarImg.src = canvas.toDataURL();
+            userAvatarImg.src = getPlaceholderDataURL(currentUserName);
         }
     } else {
         currentUser = null;
         currentUserName = '';
-        userAvatarContainer.style.display = 'none';
-        loginBtn.style.display = 'block';
+        animateLogoutTransition(loginBtn, userAvatarContainer);
     }
 });
 
@@ -331,12 +426,6 @@ function openModal(modal) {
     modalOverlay.style.display = 'flex';
     modal.classList.add('show');
 }
-
-// --- Обработчики кнопок ---
-reviewsBtn.addEventListener('click', () => {
-    loadReviews();
-    openModal(reviewsModal);
-});
 
 feedbackBubble.addEventListener('click', () => {
     if (!currentUser) openModal(loginModal);
@@ -354,7 +443,7 @@ document.getElementById('switch-to-register').addEventListener('click', () => {
 // --- Обработчики меню аватарки ---
 userAvatarImg.addEventListener('click', (e) => {
     e.stopPropagation();
-    dropdownMenu.classList.toggle('show');
+    toggleDropdownMenu(!dropdownMenu.classList.contains('show'));
 });
 
 document.addEventListener('click', (e) => {
@@ -365,20 +454,63 @@ document.addEventListener('click', (e) => {
 
 dropdownLogout.addEventListener('click', async () => {
     try {
+        toggleDropdownMenu(false);
+        dropdownMenu.classList.remove('show');
         await signOut(auth);
         showNotification('Вы вышли', 'info');
-        dropdownMenu.classList.remove('show');
     } catch (error) {
         showNotification('Ошибка: ' + error.message, 'error');
     }
 });
 
+// --- Настройки ---
+const settingsModal   = document.getElementById('settings-modal');
+const settingsMenuItem = document.getElementById('settings-menu-item');
+
+settingsMenuItem?.addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleDropdownMenu(false);
+    openModal(settingsModal);
+});
+
+document.getElementById('close-settings')?.addEventListener('click', closeAllModals);
+
+document.getElementById('theme-dark')?.addEventListener('click', () => {
+    document.body.classList.remove('theme-light');
+    localStorage.setItem('vibe-theme', 'dark');
+    document.getElementById('theme-dark').classList.add('active');
+    document.getElementById('theme-light').classList.remove('active');
+});
+
+document.getElementById('theme-light')?.addEventListener('click', () => {
+    document.body.classList.add('theme-light');
+    localStorage.setItem('vibe-theme', 'light');
+    document.getElementById('theme-light').classList.add('active');
+    document.getElementById('theme-dark').classList.remove('active');
+});
+
+document.getElementById('particle-count')?.addEventListener('change', e => {
+    const count = parseInt(e.target.value);
+    const val = JSON.stringify({ count });
+    localStorage.setItem('vibe-particle-setting', val);
+    window.dispatchEvent(new StorageEvent('storage', { key: 'vibe-particle-setting', newValue: val }));
+});
+
+// Применяем сохранённую тему при загрузке
+(function loadSettings() {
+    const theme = localStorage.getItem('vibe-theme') || 'dark';
+    document.body.classList.toggle('theme-light', theme === 'light');
+    document.getElementById('theme-dark')?.classList.toggle('active', theme !== 'light');
+    document.getElementById('theme-light')?.classList.toggle('active', theme === 'light');
+    const ps = localStorage.getItem('vibe-particle-setting');
+    if (ps) {
+        try { document.getElementById('particle-count').value = JSON.parse(ps).count; } catch {}
+    }
+}());
+
 // --- Анимация при загрузке ---
 window.addEventListener('load', () => {
-    const titleEl = document.getElementById('main-title');
     const subtitleEl = document.getElementById('main-subtitle');
-    
-    // Анимируем подзаголовок
     if (subtitleEl) {
         const originalText = subtitleEl.textContent;
         typeWriter(subtitleEl, originalText, 30);
@@ -387,5 +519,7 @@ window.addEventListener('load', () => {
     if (core) {
         core.style.animation = 'orb-breathe 4s ease-in-out infinite';
     }
-    loadReviews();
+    
+    // Запускаем real-time подписку на отзывы
+    subscribeToReviews();
 });

@@ -1,11 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { auth, db, showNotification, getPlaceholderDataURL, toggleDropdownMenu, animateLoginTransition, animateLogoutTransition } from './firebase.js';
 import { 
-    getAuth, 
     signOut,
-    onAuthStateChanged 
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { 
-    getFirestore, 
     doc,
     getDoc,
     updateDoc,
@@ -14,27 +16,16 @@ import {
     query,
     where,
     writeBatch,
-    Timestamp
+    Timestamp,
+    setDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyB2h26sAkkhHwUJdx6eeVxz6fY9qVG8bZM",
-    authDomain: "vibedb-71371.firebaseapp.com",
-    projectId: "vibedb-71371",
-    storageBucket: "vibedb-71371.firebasestorage.app",
-    messagingSenderId: "893073137943",
-    appId: "1:893073137943:web:a228669285bfa5c6485752",
-    measurementId: "G-BP4CLBJB55"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 // Ваш API-ключ ImgBB
 const IMGBB_API_KEY = '4f54b5702a59e82eef094194d0fc8936';
 
 // DOM элементы
+const feedbackBubble = document.getElementById('feedback-bubble');
 const loginBtn = document.getElementById('login-btn');
 const notificationContainer = document.getElementById('notification-container');
 const profileContainer = document.getElementById('profile-container');
@@ -62,6 +53,17 @@ const editAvatarInput = document.getElementById('edit-avatar');
 const avatarImg = document.getElementById('avatar-img');
 const avatarPlaceholder = document.getElementById('avatar-placeholder');
 
+// Модалки
+const modalOverlay = document.getElementById('modal-overlay');
+const loginModal = document.getElementById('login-modal');
+const registerModal = document.getElementById('register-modal');
+const settingsModal = document.getElementById('settings-modal');
+const closeSettings = document.getElementById('close-settings');
+const themeDark = document.getElementById('theme-dark');
+const themeLight = document.getElementById('theme-light');
+const particleCountSelect = document.getElementById('particle-count');
+const settingsMenuItem = document.getElementById('settings-menu-item');
+
 let isAdmin = false;
 let allUsers = [];
 let currentUser = null;
@@ -69,20 +71,322 @@ let currentUserData = null;
 let currentUserName = '';
 let currentUserAvatar = null;
 
-// --- Уведомления ---
-function showNotification(message, type = 'info', duration = 4000) {
-    if (!notificationContainer) return;
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    notificationContainer.appendChild(notification);
-    setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => notification.remove(), 300);
-    }, duration);
+// --- Управление модалками ---
+function closeAllModals() {
+    document.querySelectorAll('.modal').forEach(m => m.classList.remove('show'));
+    if (modalOverlay) modalOverlay.style.display = 'none';
 }
 
-// --- Загрузка на ImgBB с уникальным именем файла ---
+function openModal(modal) {
+    closeAllModals();
+    if (modalOverlay) modalOverlay.style.display = 'flex';
+    modal.classList.add('show');
+}
+
+// --- Обработчики входа/регистрации ---
+loginBtn.addEventListener('click', () => openModal(loginModal));
+
+document.getElementById('switch-to-register')?.addEventListener('click', () => {
+    closeAllModals();
+    openModal(registerModal);
+});
+
+document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeAllModals));
+modalOverlay?.addEventListener('click', closeAllModals);
+
+// --- Вход ---
+document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        if (!user.emailVerified) {
+            await signOut(auth);
+            showNotification('Email не подтверждён. Проверьте папку "Спам".', 'error', 8000);
+            return;
+        }
+        showNotification('Вход выполнен', 'success');
+        closeAllModals();
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message, 'error');
+    }
+});
+
+// --- Регистрация ---
+document.getElementById('register-form-step1')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const password = document.getElementById('register-password').value;
+    const confirm = document.getElementById('register-confirm').value;
+
+    if (password !== confirm) {
+        showNotification('Пароли не совпадают', 'error');
+        return;
+    }
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await sendEmailVerification(user);
+        await setDoc(doc(db, 'users', user.uid), {
+            name: name,
+            email: email,
+            createdAt: serverTimestamp()
+        });
+        await signOut(auth);
+        showNotification('Регистрация успешна! Проверьте email для подтверждения.', 'info', 8000);
+        closeAllModals();
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message, 'error');
+    }
+});
+
+// --- Забыли пароль ---
+document.getElementById('forgot-password-btn')?.addEventListener('click', () => {
+    const email = prompt('Введите ваш email для сброса пароля:');
+    if (email) {
+        sendPasswordResetEmail(auth, email)
+            .then(() => showNotification('Письмо для сброса пароля отправлено!', 'success'))
+            .catch((error) => showNotification('Ошибка: ' + error.message, 'error'));
+    }
+});
+
+// --- Выход ---
+dropdownLogout.addEventListener('click', async () => {
+    try {
+        await signOut(auth);
+        showNotification('Вы вышли', 'info');
+        toggleDropdownMenu(false);
+    } catch (error) {
+        showNotification('Ошибка: ' + error.message, 'error');
+    }
+});
+
+// --- Аватарка и меню ---
+userAvatarImg.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDropdownMenu(!dropdownMenu.classList.contains('show'));
+});
+
+// Обработчик для закрытия меню при клике вне (уже есть в firebase.js, но можно оставить)
+document.addEventListener('click', (e) => {
+    if (userAvatarContainer && !userAvatarContainer.contains(e.target) && dropdownMenu.classList.contains('show')) {
+        toggleDropdownMenu(false);
+    }
+});
+
+// --- Обработчик кнопки отзыва ---
+feedbackBubble.addEventListener('click', () => {
+    if (!currentUser) openModal(loginModal);
+    else openModal(writeReviewModal);
+});
+
+// =====================================================================
+// АВАТАР-КРОППЕР
+// Показывает превью, позволяет двигать и зуммировать область кропа
+// =====================================================================
+
+let cropState = {
+    file:    null,
+    img:     null,
+    scale:   1,
+    offsetX: 0,
+    offsetY: 0,
+    dragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragOriginX: 0,
+    dragOriginY: 0,
+};
+
+// Создаём DOM кроппера (вставляется один раз)
+function createCropperUI() {
+    if (document.getElementById('avatar-cropper-wrap')) return;
+
+    const wrap = document.createElement('div');
+    wrap.id = 'avatar-cropper-wrap';
+    wrap.style.cssText = 'display:none; margin-bottom:14px;';
+
+    wrap.innerHTML = `
+        <div style="position:relative; width:200px; height:200px; border-radius:50%;
+             overflow:hidden; border:2px solid var(--border-accent);
+             background:#111; cursor:grab; user-select:none; touch-action:none;
+             margin: 0 auto 12px;" id="crop-viewport">
+            <canvas id="crop-canvas" width="200" height="200"
+                style="display:block; width:200px; height:200px;"></canvas>
+            <div style="position:absolute;inset:0;border-radius:50%;
+                box-shadow:0 0 0 9999px rgba(0,0,0,0.55);pointer-events:none;"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; justify-content:center; margin-bottom:4px;">
+            <span style="font-size:0.78rem; color:var(--text-muted);">🔍</span>
+            <input type="range" id="crop-zoom" min="0.5" max="4" step="0.01" value="1"
+                style="flex:1; max-width:160px; accent-color:var(--accent-color); cursor:pointer;
+                       background:none; border:none; padding:0;">
+            <span style="font-size:0.78rem; color:var(--text-muted);" id="crop-zoom-label">100%</span>
+        </div>
+        <div style="text-align:center; font-size:0.72rem; color:var(--text-muted);">
+            Перетащи фото, чтобы выбрать область
+        </div>
+    `;
+
+    // Вставляем перед полем выбора файла
+    const fileInput = document.getElementById('edit-avatar');
+    if (fileInput) fileInput.parentNode.insertBefore(wrap, fileInput.nextSibling);
+
+    initCropEvents();
+}
+
+function initCropEvents() {
+    const viewport = document.getElementById('crop-viewport');
+    const zoomSlider = document.getElementById('crop-zoom');
+    if (!viewport || !zoomSlider) return;
+
+    // Зум слайдером
+    zoomSlider.addEventListener('input', () => {
+        cropState.scale = parseFloat(zoomSlider.value);
+        document.getElementById('crop-zoom-label').textContent =
+            Math.round(cropState.scale * 100) + '%';
+        drawCrop();
+    });
+
+    // Зум колёсиком
+    viewport.addEventListener('wheel', e => {
+        e.preventDefault();
+        cropState.scale = Math.min(4, Math.max(0.5,
+            cropState.scale - e.deltaY * 0.001
+        ));
+        zoomSlider.value = cropState.scale;
+        document.getElementById('crop-zoom-label').textContent =
+            Math.round(cropState.scale * 100) + '%';
+        drawCrop();
+    }, { passive: false });
+
+    // Мышь
+    viewport.addEventListener('mousedown', e => {
+        cropState.dragging   = true;
+        cropState.dragStartX = e.clientX;
+        cropState.dragStartY = e.clientY;
+        cropState.dragOriginX = cropState.offsetX;
+        cropState.dragOriginY = cropState.offsetY;
+        viewport.style.cursor = 'grabbing';
+    });
+    document.addEventListener('mousemove', e => {
+        if (!cropState.dragging) return;
+        cropState.offsetX = cropState.dragOriginX + (e.clientX - cropState.dragStartX);
+        cropState.offsetY = cropState.dragOriginY + (e.clientY - cropState.dragStartY);
+        drawCrop();
+    });
+    document.addEventListener('mouseup', () => {
+        cropState.dragging = false;
+        if (viewport) viewport.style.cursor = 'grab';
+    });
+
+    // Touch
+    viewport.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+            cropState.dragging   = true;
+            cropState.dragStartX = e.touches[0].clientX;
+            cropState.dragStartY = e.touches[0].clientY;
+            cropState.dragOriginX = cropState.offsetX;
+            cropState.dragOriginY = cropState.offsetY;
+        }
+    });
+    viewport.addEventListener('touchmove', e => {
+        if (!cropState.dragging || e.touches.length !== 1) return;
+        e.preventDefault();
+        cropState.offsetX = cropState.dragOriginX + (e.touches[0].clientX - cropState.dragStartX);
+        cropState.offsetY = cropState.dragOriginY + (e.touches[0].clientY - cropState.dragStartY);
+        drawCrop();
+    }, { passive: false });
+    viewport.addEventListener('touchend', () => { cropState.dragging = false; });
+}
+
+function drawCrop() {
+    const canvas = document.getElementById('crop-canvas');
+    if (!canvas || !cropState.img) return;
+    const ctx = canvas.getContext('2d');
+    const size = 200;
+
+    ctx.clearRect(0, 0, size, size);
+
+    const img = cropState.img;
+    const scale = cropState.scale;
+
+    // Рисуем изображение по центру с учётом смещения и масштаба
+    const drawW = img.naturalWidth  * scale;
+    const drawH = img.naturalHeight * scale;
+    const x = size / 2 - drawW / 2 + cropState.offsetX;
+    const y = size / 2 - drawH / 2 + cropState.offsetY;
+
+    ctx.drawImage(img, x, y, drawW, drawH);
+}
+
+function loadImageToCropper(file) {
+    cropState.file    = file;
+    cropState.scale   = 1;
+    cropState.offsetX = 0;
+    cropState.offsetY = 0;
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+            cropState.img = img;
+
+            // Авто-масштаб чтобы заполнить круг
+            const size = 200;
+            const fitScale = Math.max(
+                size / img.naturalWidth,
+                size / img.naturalHeight
+            );
+            cropState.scale = fitScale;
+            const zoomSlider = document.getElementById('crop-zoom');
+            if (zoomSlider) {
+                zoomSlider.value = Math.min(4, fitScale);
+                document.getElementById('crop-zoom-label').textContent =
+                    Math.round(cropState.scale * 100) + '%';
+            }
+
+            const wrap = document.getElementById('avatar-cropper-wrap');
+            if (wrap) wrap.style.display = 'block';
+
+            drawCrop();
+        };
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Экспортирует обрезанное изображение как Blob
+function getCroppedBlob(mimeType = 'image/jpeg', quality = 0.9) {
+    return new Promise(resolve => {
+        const canvas = document.getElementById('crop-canvas');
+        if (!canvas || !cropState.img) { resolve(null); return; }
+        canvas.toBlob(resolve, mimeType, quality);
+    });
+}
+
+// Слушаем выбор файла
+document.getElementById('edit-avatar')?.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('Файл слишком большой (макс. 5 МБ)', 'error');
+        return;
+    }
+    createCropperUI();
+    loadImageToCropper(file);
+});
+
+// =====================================================================
+// КОНЕЦ КРОППЕРА
+// =====================================================================
+
+// --- Загрузка на ImgBB ---
 async function uploadToImgBB(file, userId) {
     const timestamp = Date.now();
     const safeFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
@@ -104,33 +408,13 @@ async function uploadToImgBB(file, userId) {
     return data.data.url;
 }
 
-// --- Генерация заглушки (canvas с буквой) ---
-function getPlaceholderDataURL(userName) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 40;
-    canvas.height = 40;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = 'var(--accent-color)';
-    ctx.beginPath();
-    ctx.arc(20, 20, 20, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = '20px Inter';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText((userName || '?').charAt(0).toUpperCase(), 20, 20);
-    return canvas.toDataURL();
-}
-
 // --- Обновление аватарки в шапке (без моргания) ---
 function updateHeaderAvatar(avatarUrl, userName) {
     if (!userAvatarContainer) return;
     userAvatarContainer.style.display = 'inline-block';
 
     if (avatarUrl) {
-        // Сначала показываем заглушку
         userAvatarImg.src = getPlaceholderDataURL(userName);
-        // Фоново загружаем реальное изображение
         const img = new Image();
         img.onload = () => {
             userAvatarImg.src = avatarUrl;
@@ -146,17 +430,10 @@ function updateHeaderAvatar(avatarUrl, userName) {
 
 // --- Обновление всех отзывов пользователя ---
 async function updateUserReviews(userId, newName, newAvatarUrl) {
-    console.log('=== updateUserReviews called ===');
-    console.log('Parameters:', { userId, newName, newAvatarUrl });
     try {
         const reviewsQuery = query(collection(db, 'reviews'), where('userId', '==', userId));
         const querySnapshot = await getDocs(reviewsQuery);
-        console.log(`Query found ${querySnapshot.size} reviews`);
-        
-        if (querySnapshot.empty) {
-            console.log('No reviews found for this user');
-            return;
-        }
+        if (querySnapshot.empty) return;
 
         const batch = writeBatch(db);
         querySnapshot.forEach(docSnapshot => {
@@ -166,9 +443,7 @@ async function updateUserReviews(userId, newName, newAvatarUrl) {
                 userAvatarUrl: newAvatarUrl || null
             });
         });
-        
         await batch.commit();
-        console.log('Batch commit successful');
         showNotification(`Обновлено ${querySnapshot.size} отзывов`, 'success');
     } catch (error) {
         console.error('ERROR in updateUserReviews:', error);
@@ -198,6 +473,13 @@ function closeEditProfile() {
     editProfileOverlay.style.display = 'none';
     editProfileModal.style.display = 'none';
     editProfileModal.classList.remove('show');
+    // Сброс кроппера
+    cropState.img = null;
+    cropState.file = null;
+    const wrap = document.getElementById('avatar-cropper-wrap');
+    if (wrap) wrap.style.display = 'none';
+    const canvas = document.getElementById('crop-canvas');
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, 200, 200);
 }
 
 closeEditProfileBtn?.addEventListener('click', closeEditProfile);
@@ -214,7 +496,7 @@ editProfileForm?.addEventListener('submit', async (e) => {
 
     try {
         const updateData = { name: newName };
-        let newAvatarUrl = currentUserData.avatarUrl; // по умолчанию старая
+        let newAvatarUrl = currentUserData.avatarUrl;
 
         if (editAvatarInput.files.length > 0) {
             const file = editAvatarInput.files[0];
@@ -223,16 +505,23 @@ editProfileForm?.addEventListener('submit', async (e) => {
                 return;
             }
             showNotification('Загрузка аватарки...', 'info');
-            newAvatarUrl = await uploadToImgBB(file, currentUser.uid);
+
+            // Если кроппер был использован — берём обрезанный blob,
+            // иначе загружаем оригинал
+            let uploadFile = file;
+            if (cropState.img) {
+                const blob = await getCroppedBlob('image/jpeg', 0.9);
+                if (blob) {
+                    uploadFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+                }
+            }
+
+            newAvatarUrl = await uploadToImgBB(uploadFile, currentUser.uid);
             updateData.avatarUrl = newAvatarUrl;
         }
 
-        // Обновляем документ пользователя
         await updateDoc(doc(db, 'users', currentUser.uid), updateData);
-
-        console.log('User document updated, now updating reviews...');
         await updateUserReviews(currentUser.uid, newName, newAvatarUrl);
-        
         showNotification('Профиль обновлён', 'success');
         closeEditProfile();
         loadProfile(currentUser);
@@ -268,6 +557,26 @@ async function checkSubscriptionExpiry(user) {
     }
 }
 
+// --- Skeleton для профиля ---
+function showProfileSkeleton() {
+    profileContainer.innerHTML = `
+        <div style="display:flex;align-items:center;gap:24px;margin-bottom:30px;">
+            <div class="skeleton-line" style="width:60px;height:60px;border-radius:50%;flex-shrink:0;"></div>
+            <div style="flex:1;">
+                <div class="skeleton-line" style="width:45%;height:16px;margin-bottom:10px;"></div>
+                <div class="skeleton-line" style="width:60%;height:12px;"></div>
+            </div>
+        </div>
+        <div class="skeleton-line" style="height:44px;border-radius:12px;margin-bottom:10px;"></div>
+        <div class="skeleton-line" style="height:44px;border-radius:12px;margin-bottom:10px;"></div>
+        <div class="skeleton-line" style="height:44px;border-radius:12px;margin-bottom:24px;"></div>
+        <div style="display:flex;gap:15px;justify-content:center;">
+            <div class="skeleton-line" style="width:130px;height:40px;border-radius:20px;"></div>
+            <div class="skeleton-line" style="width:160px;height:40px;border-radius:20px;"></div>
+        </div>
+    `;
+}
+
 // --- Загрузка профиля ---
 async function loadProfile(user) {
     if (!user) {
@@ -283,16 +592,15 @@ async function loadProfile(user) {
             const userData = userDoc.data();
             currentUserData = userData;
             isAdmin = userData.role === 'admin';
-            
+
             await checkSubscriptionExpiry(user);
 
             const updatedDoc = await getDoc(userDocRef);
             const updatedData = updatedDoc.data();
             const subscription = updatedData.subscription || { plan: 'free' };
-            
+
             let expiresDisplay = 'бессрочно';
             if (subscription.plan === 'limitless') {
-                // Для поля "Действует до:" используем увеличенный символ бесконечности
                 expiresDisplay = '<span class="infinity-symbol">∞</span>';
             } else if (subscription.expires) {
                 const expiryDate = subscription.expires.toDate ? subscription.expires.toDate() : new Date(subscription.expires);
@@ -300,17 +608,11 @@ async function loadProfile(user) {
             }
 
             let subscriptionHtml = '';
-            if (subscription.plan === 'free') {
-                subscriptionHtml = '<span class="subscription-badge" style="color: #aaa;">Free</span>';
-            } else if (subscription.plan === 'basic') {
-                subscriptionHtml = '<span class="subscription-badge" style="color: #00ff88;">Basic</span>';
-            } else if (subscription.plan === 'pro') {
-                subscriptionHtml = '<span class="subscription-badge" style="color: gold;">Pro</span>';
-            } else if (subscription.plan === 'limitless') {
-                subscriptionHtml = '<span class="subscription-badge" style="color: #ff66cc; border-color: #ff66cc;">✨ Limitless ✨</span>';
-            } else {
-                subscriptionHtml = '<span class="subscription-badge">Неизвестно</span>';
-            }
+            if (subscription.plan === 'free') subscriptionHtml = '<span class="subscription-badge" style="color: #aaa;">Free</span>';
+            else if (subscription.plan === 'basic') subscriptionHtml = '<span class="subscription-badge" style="color: #00ff88;">Basic</span>';
+            else if (subscription.plan === 'pro') subscriptionHtml = '<span class="subscription-badge" style="color: gold;">Pro</span>';
+            else if (subscription.plan === 'limitless') subscriptionHtml = '<span class="subscription-badge" style="color: #ff66cc; border-color: #ff66cc;">✨ Limitless ✨</span>';
+            else subscriptionHtml = '<span class="subscription-badge">Неизвестно</span>';
 
             let avatarHtml;
             if (updatedData.avatarUrl) {
@@ -368,10 +670,9 @@ async function loadProfile(user) {
     }
 }
 
-// --- Админ-панель (без изменений) ---
+// --- Админ-панель ---
 function openAdminPanel() {
     if (!adminModalOverlay || !adminModal) {
-        console.error('Admin modal elements not found');
         showNotification('Ошибка: элементы админ-панели не найдены', 'error');
         return;
     }
@@ -499,47 +800,68 @@ function renderUsersList(users) {
     });
 }
 
-// --- Аутентификация и управление меню ---
-if (loginBtn) {
-    loginBtn.addEventListener('click', () => window.location.href = 'index.html');
-} else {
-    console.error('loginBtn not found');
-}
-
-if (dropdownLogout) {
-    dropdownLogout.addEventListener('click', async () => {
-        try {
-            await signOut(auth);
-            showNotification('Вы вышли', 'info');
-            window.location.href = 'index.html';
-        } catch (error) {
-            showNotification('Ошибка: ' + error.message, 'error');
-        }
-    });
-}
-
-// Открытие/закрытие меню при клике на аватарку
-if (userAvatarImg) {
-    userAvatarImg.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('show');
-    });
-}
-
-// Закрытие меню при клике вне его
-document.addEventListener('click', (e) => {
-    if (userAvatarContainer && !userAvatarContainer.contains(e.target)) {
-        dropdownMenu.classList.remove('show');
+// --- Настройки ---
+function loadSettings() {
+    const savedTheme = localStorage.getItem('vibe-theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('theme-light');
+        themeDark?.classList.remove('active');
+        themeLight?.classList.add('active');
+    } else {
+        document.body.classList.remove('theme-light');
+        themeDark?.classList.add('active');
+        themeLight?.classList.remove('active');
     }
+    const savedParticles = localStorage.getItem('vibe-particle-setting');
+    if (savedParticles) {
+        try {
+            const parsed = JSON.parse(savedParticles);
+            particleCountSelect.value = parsed.count;
+        } catch (e) {}
+    }
+}
+
+settingsMenuItem?.addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleDropdownMenu(false);
+    openModal(settingsModal);
 });
+
+closeSettings?.addEventListener('click', closeAllModals);
+
+themeDark?.addEventListener('click', () => {
+    document.body.classList.remove('theme-light');
+    localStorage.setItem('vibe-theme', 'dark');
+    themeDark.classList.add('active');
+    themeLight.classList.remove('active');
+});
+
+themeLight?.addEventListener('click', () => {
+    document.body.classList.add('theme-light');
+    localStorage.setItem('vibe-theme', 'light');
+    themeLight.classList.add('active');
+    themeDark.classList.remove('active');
+});
+
+particleCountSelect?.addEventListener('change', () => {
+    const count = parseInt(particleCountSelect.value);
+    localStorage.setItem('vibe-particle-setting', JSON.stringify({ count }));
+    window.dispatchEvent(new StorageEvent('storage', {
+        key: 'vibe-particle-setting',
+        newValue: JSON.stringify({ count })
+    }));
+});
+
+loadSettings();
 
 // --- Слушаем состояние аутентификации ---
 onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     if (user) {
-        // Скрываем кнопку входа, показываем аватарку
         if (loginBtn) loginBtn.style.display = 'none';
-        if (userAvatarContainer) userAvatarContainer.style.display = 'inline-block';
+        if (userAvatarContainer) {
+            animateLoginTransition(loginBtn, userAvatarContainer, userAvatarImg);
+        }
 
         try {
             const docRef = doc(db, 'users', user.uid);
@@ -564,12 +886,12 @@ onAuthStateChanged(auth, async (user) => {
             updateHeaderAvatar(null, currentUserName);
         }
 
+        showProfileSkeleton();
         loadProfile(user);
     } else {
         currentUser = null;
         currentUserName = '';
-        if (loginBtn) loginBtn.style.display = 'block';
-        if (userAvatarContainer) userAvatarContainer.style.display = 'none';
-        profileContainer.innerHTML = '<div style="text-align: center; color: var(--text-dim);">Пожалуйста, войдите в систему</div>';
+        animateLogoutTransition(loginBtn, userAvatarContainer);
+        profileContainer.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 60px 0;">Войдите в аккаунт, чтобы посмотреть профиль</div>';
     }
 });

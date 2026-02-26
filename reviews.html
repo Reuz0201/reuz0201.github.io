@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вайб — Ассистент с отзывами</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00f2ff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Вайб">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>Вайб — Отзывы</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="style-additions.css">
 </head>
 <body>
-
     <canvas id="bg-canvas"></canvas>
     <script src="background.js" defer></script>
     <script src="parallax.js" defer></script>
@@ -27,43 +21,69 @@
         <span>✍️</span> Написать отзыв
     </button>
 
-    <!-- Контейнер для уведомлений -->
     <div class="notification-container" id="notification-container"></div>
 
     <div class="container">
         <header>
             <div class="logo">Вайб</div>
             <div class="header-right">
+                <a href="index.html" class="reviews-btn">Главная</a>
                 <a href="download.html" class="reviews-btn">Скачать</a>
                 <a href="pricing.html" class="reviews-btn">Тарифы</a>
-                <a href="reviews.html" class="reviews-btn">Отзывы</a>
-                <div id="user-avatar-container" style="display: none;">
+                <div id="user-avatar-container" style="display:none;">
                     <img id="user-avatar-img" src="" alt="avatar" class="user-avatar">
                 </div>
                 <button class="login-btn" id="login-btn">Войти</button>
             </div>
         </header>
 
-        <main class="hero">
-            <div class="vibe-visual">
-                <div class="wave"></div>
-                <div class="wave"></div>
-                <div class="core" id="vibe-core"></div>
+        <main>
+            <!-- Hero -->
+            <div class="reviews-page-hero">
+                <h1>Отзывы пользователей</h1>
+                <p>Что говорят о нас те, кто уже попробовал</p>
             </div>
-            <h1 id="main-title">Простота. Порядок. Интеллект.</h1>
-            <p class="subtitle" id="main-subtitle">Помощник который автоматизирует большинство твоих рутиных действий от открытия ютуба, до больших сценариев по типу "Включи фильм"</p>
-        </main>
 
-        <!-- Блок последних отзывов -->
-        <section class="latest-reviews">
-            <div class="latest-reviews-header">
-                <h2><span id="review-count">0</span> отзывов</h2>
-                <a href="reviews.html" class="all-reviews-link">Все отзывы →</a>
+            <!-- Статистика -->
+            <div class="reviews-stats" id="reviews-stats" style="opacity:0; transition:opacity 0.5s;">
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-count">—</div>
+                    <div class="stat-label">Отзывов</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-avg">—</div>
+                    <div class="stat-label">Средняя оценка</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="stat-five">—</div>
+                    <div class="stat-label">Пятёрок</div>
+                </div>
             </div>
-            <div class="reviews-grid" id="latest-reviews-grid">
-                <!-- заполняется js -->
+
+            <!-- Фильтр + сортировка -->
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:32px;">
+                <div class="reviews-filter" id="reviews-filter" style="margin-bottom:0;">
+                    <button class="filter-btn active" data-filter="all">Все</button>
+                    <button class="filter-btn" data-filter="5">★★★★★</button>
+                    <button class="filter-btn" data-filter="4">★★★★</button>
+                    <button class="filter-btn" data-filter="3">★★★</button>
+                    <button class="filter-btn" data-filter="2">★★</button>
+                    <button class="filter-btn" data-filter="1">★</button>
+                </div>
+                <div class="reviews-sort" id="reviews-sort">
+                    <button class="sort-btn active" data-sort="newest">Новые</button>
+                    <button class="sort-btn" data-sort="popular">Популярные</button>
+                </div>
             </div>
-        </section>
+
+            <!-- Сетка отзывов -->
+            <div class="reviews-full-grid" id="reviews-full-grid">
+                <!-- скелетоны при загрузке -->
+            </div>
+
+            <!-- Загрузить ещё -->
+            <button class="load-more-btn" id="load-more-btn" style="display:none;">Загрузить ещё</button>
+        </main>
 
         <footer>
             <div class="secret-note">Возможно подстройка под ваш характер ;)</div>
@@ -71,10 +91,21 @@
         </footer>
     </div>
 
+    <!-- Попап полного текста отзыва -->
+    <div id="rv-full-popup">
+        <div id="rv-full-inner">
+            <button id="rv-full-close" style="position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;line-height:1;">&times;</button>
+            <div id="rv-full-meta" style="display:flex;gap:14px;align-items:center;margin-bottom:14px;"></div>
+            <div id="rv-full-stars" style="color:#fbbf24;font-size:1rem;letter-spacing:2px;margin-bottom:14px;"></div>
+            <p id="rv-full-text" style="color:var(--text-secondary);font-size:1rem;line-height:1.7;margin:0 0 12px;"></p>
+            <div id="rv-full-date" style="font-size:0.75rem;color:var(--text-muted);"></div>
+        </div>
+    </div>
+
     <!-- Модальные окна -->
     <div class="modal-overlay" id="modal-overlay"></div>
 
-    <!-- Модалка написания отзыва -->
+    <!-- Написать отзыв -->
     <div class="modal" id="write-review-modal">
         <div class="modal-header">
             <h2>Оставить отзыв</h2>
@@ -90,15 +121,34 @@
                     <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
                 </div>
                 <textarea id="review-text" placeholder="Ваш отзыв" rows="4" maxlength="1000" required></textarea>
-                <div style="text-align:right;font-size:0.78rem;color:var(--text-dim);margin-top:-10px;margin-bottom:10px;">
-                    <span id="review-char-count">0</span>/1000
-                </div>
                 <button type="submit">Отправить</button>
             </form>
         </div>
     </div>
 
-    <!-- Модалка входа -->
+    <!-- Редактировать отзыв -->
+    <div class="modal" id="edit-review-modal">
+        <div class="modal-header">
+            <h2>Редактировать отзыв</h2>
+            <button class="modal-close" id="close-edit-review">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="edit-review-form">
+                <div class="star-rating">
+                    <input type="radio" name="edit-rating" id="edit-star5" value="5"><label for="edit-star5">★</label>
+                    <input type="radio" name="edit-rating" id="edit-star4" value="4"><label for="edit-star4">★</label>
+                    <input type="radio" name="edit-rating" id="edit-star3" value="3"><label for="edit-star3">★</label>
+                    <input type="radio" name="edit-rating" id="edit-star2" value="2"><label for="edit-star2">★</label>
+                    <input type="radio" name="edit-rating" id="edit-star1" value="1"><label for="edit-star1">★</label>
+                </div>
+                <textarea id="edit-review-text" placeholder="Ваш отзыв" rows="4" maxlength="1000" required></textarea>
+                <div style="text-align:right;font-size:0.8rem;color:var(--text-dim);"><span id="edit-char-count">0</span>/1000</div>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Вход -->
     <div class="modal" id="login-modal">
         <div class="modal-header">
             <h2>Вход</h2>
@@ -115,7 +165,7 @@
         </div>
     </div>
 
-    <!-- Модалка регистрации -->
+    <!-- Регистрация -->
     <div class="modal" id="register-modal">
         <div class="modal-header">
             <h2>Регистрация</h2>
@@ -131,15 +181,15 @@
                     <button type="submit">Зарегистрироваться</button>
                 </form>
             </div>
-            <div id="register-step2" style="display: none;">
-                <p>На ваш email отправлен код подтверждения. (Симуляция: код <strong id="display-code"></strong>)</p>
+            <div id="register-step2" style="display:none;">
+                <p>На ваш email отправлен код подтверждения.</p>
                 <input type="text" id="verification-code" placeholder="Введите код">
                 <button id="verify-code">Подтвердить</button>
             </div>
         </div>
     </div>
 
-    <!-- Модалка настроек -->
+    <!-- Настройки -->
     <div class="modal" id="settings-modal">
         <div class="modal-header">
             <h2>Настройки</h2>
@@ -171,8 +221,23 @@
         <button class="dropdown-item" id="dropdown-logout">Выйти</button>
     </div>
 
-    <!-- Подключаем Firebase и скрипт -->
-    <script type="module" src="script.js"></script>
+    <!-- Ответ на отзыв -->
+    <div class="modal" id="reply-modal">
+        <div class="modal-header">
+            <h2>Ответить на отзыв</h2>
+            <button class="modal-close" id="close-reply">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="reply-preview" style="background:var(--surface);border-radius:12px;padding:12px 16px;margin-bottom:4px;font-size:0.85rem;color:var(--text-dim);border-left:3px solid var(--border-accent);"></div>
+            <form id="reply-form">
+                <textarea id="reply-text" placeholder="Ваш ответ..." rows="3" maxlength="500" required></textarea>
+                <div style="text-align:right;font-size:0.78rem;color:var(--text-dim);margin-top:-10px;"><span id="reply-char-count">0</span>/500</div>
+                <button type="submit">Отправить ответ</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="script-reviews.js"></script>
     <script>
         document.addEventListener("click", function(e) {
             if (!e.target.classList.contains("toggle-password")) return;
@@ -182,16 +247,6 @@
             input.type = isPassword ? "text" : "password";
             e.target.textContent = isPassword ? "🙈" : "👁";
         });
-    </script>
-    <!-- PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('SW registered:', reg.scope))
-                    .catch(err => console.warn('SW failed:', err));
-            });
-        }
     </script>
 </body>
 </html>

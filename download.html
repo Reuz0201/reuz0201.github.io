@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вайб — Скачать</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-additions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ─── Download page specific styles ─── */
+        .download-hero {
+            text-align: center;
+            padding: 80px 0 50px;
+            position: relative;
+        }
+        .download-hero h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--text-main) 30%, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .download-hero p {
+            color: var(--text-dim);
+            font-size: 1rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        .version-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,242,255,0.08);
+            border: 1px solid var(--border-accent);
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.82rem;
+            color: var(--accent-color);
+            margin-bottom: 36px;
+            letter-spacing: 0.3px;
+        }
+        .version-badge .dot {
+            width: 7px; height: 7px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        /* ─── Секция превью приложения ─── */
+        .preview-section {
+            margin-bottom: 80px;
+        }
+        .preview-section h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+        .preview-section .section-sub {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 640px) {
+            .preview-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Ячейка-заглушка */
+        .preview-slot {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.25s, transform 0.25s;
+            cursor: default;
+        }
+        .preview-slot:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+        }
+        /* Реальное изображение */
+        .preview-slot img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        /* Видео-превью */
+        .preview-slot iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 20px;
+        }
+        /* Заглушка (пока нет контента) */
+        .preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            pointer-events: none;
+            user-select: none;
+        }
+        .preview-placeholder-icon {
+            font-size: 2.2rem;
+            opacity: 0.4;
+        }
+        .preview-placeholder-label {
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+            opacity: 0.5;
+        }
+        /* Бейдж типа контента */
+        .preview-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+            z-index: 1;
+        }
+        /* Большая ячейка на всю ширину */
+        .preview-slot.wide {
+            grid-column: 1 / -1;
+            aspect-ratio: 21/9;
+        }
+        @media (max-width: 640px) {
+            .preview-slot.wide { aspect-ratio: 16/9; }
+        }
+        .download-card {
+            background: linear-gradient(135deg, rgba(0,242,255,0.06), rgba(124,77,255,0.06));
+            border: 1px solid var(--border-accent);
+            border-radius: 28px;
+            padding: 36px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; right: -20%;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(0,242,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .download-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(0,242,255,0.12);
+        }
+        .download-card-info h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .download-card-info p {
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            margin: 0;
+        }
+        .download-card-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .download-card-meta span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .download-card-meta span strong {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: 0 8px 30px rgba(0,242,255,0.3);
+            flex-shrink: 0;
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,242,255,0.5);
+            background: #00e5f0;
+        }
+        .btn-download.disabled {
+            background: var(--surface);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        .btn-download.disabled:hover { transform: none; }
+
+        .download-note {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,193,7,0.06);
+            border: 1px solid rgba(255,193,7,0.2);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 0.84rem;
+            color: rgba(255,193,7,0.85);
+            margin-bottom: 48px;
+        }
+
+        /* ─── Two-col layout ─── */
+        .download-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin-bottom: 60px;
+        }
+        @media (max-width: 680px) {
+            .download-grid { grid-template-columns: 1fr; }
+            .download-card { flex-direction: column; align-items: flex-start; }
+            .download-hero h1 { font-size: 2rem; }
+        }
+
+        /* ─── System requirements ─── */
+        .sysreq-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px 28px;
+        }
+        .sysreq-card h3 {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            font-weight: 500;
+        }
+        .sysreq-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+        .sysreq-row:last-child { border-bottom: none; }
+        .sysreq-row .label { color: var(--text-dim); }
+        .sysreq-row .val   { color: var(--text-main); font-weight: 500; text-align: right; }
+
+        /* ─── Changelog ─── */
+        .changelog {
+            margin-bottom: 80px;
+        }
+        .changelog h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            letter-spacing: -0.3px;
+        }
+        .changelog-item {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 0 24px;
+            margin-bottom: 2px;
+            position: relative;
+        }
+        .changelog-version {
+            padding: 18px 0;
+            text-align: right;
+        }
+        .changelog-version .ver {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        .changelog-version .date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .changelog-content {
+            border-left: 2px solid var(--border);
+            padding: 18px 0 18px 24px;
+            position: relative;
+        }
+        .changelog-content::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 24px;
+            width: 8px; height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+        .changelog-item:first-child .changelog-content::before {
+            background: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color), 0 0 30px rgba(0,242,255,0.3);
+            animation: pulse-dot 2s infinite;
+        }
+        .changelog-content h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .changelog-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .tag.new     { background: rgba(0,242,255,0.12); color: var(--accent-color); border: 1px solid rgba(0,242,255,0.25); }
+        .tag.fix     { background: rgba(255,200,50,0.1);  color: #ffc832; border: 1px solid rgba(255,200,50,0.25); }
+        .tag.improve { background: rgba(124,77,255,0.12); color: #9c6fff; border: 1px solid rgba(124,77,255,0.25); }
+        .tag.perf    { background: rgba(0,255,136,0.1);  color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
+
+        .changelog-list {
+            list-style: none;
+            padding: 0; margin: 0;
+        }
+        .changelog-list li {
+            font-size: 0.86rem;
+            color: var(--text-secondary);
+            padding: 3px 0;
+            display: flex;
+            gap: 8px;
+        }
+        .changelog-list li::before {
+            content: '—';
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 600px) {
+            .changelog-item { grid-template-columns: 80px 1fr; gap: 0 12px; }
+            .changelog-version .ver { font-size: 0.78rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <script src="background.js" defer></script>
+    <script src="parallax.js" defer></script>
+    <script src="page-transitions.js" defer></script>
+
+    <button class="feedback-bubble" id="feedback-bubble"><span>✍️</span> Написать отзыв</button>
+    <div class="notification-container" id="notification-container"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">Вайб</div>
+            <div class="header-right">
+                <a href="index.html"    class="reviews-btn">Главная</a>
+                <a href="pricing.html"  class="reviews-btn">Тарифы</a>
+                <a href="reviews.html"  class="reviews-btn">Отзывы</a>
+                <div id="user-avatar-container" style="display:none;">
+                    <img id="user-avatar-img" src="" alt="avatar" class="user-avatar">
+                </div>
+                <button class="login-btn" id="login-btn">Войти</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Hero -->
+            <section class="download-hero">
+                <div class="version-badge">
+                    <span class="dot"></span>
+                    Актуальная версия: <strong>0.1</strong>
+                </div>
+                <h1>Скачать Вайб</h1>
+                <p>Умный ассистент для Windows. Установи и забудь о рутине.</p>
+            </section>
+
+            <!-- Main download -->
+            <div class="download-card">
+                <div class="download-card-info">
+                    <h3>🪟 Вайб для Windows</h3>
+                    <p>Установщик для Windows 10 / 11 (64-bit)</p>
+                    <div class="download-card-meta">
+                        <span><strong>Версия:</strong> 0.1</span>
+                        <span><strong>Размер:</strong> ~48 МБ</span>
+                        <span><strong>Обновлено:</strong> 26 февраля 2026</span>
+                    </div>
+                </div>
+                <a href="#" class="btn-download" id="main-download-btn" onclick="handleDownload(event)">
+                    ↓ Скачать .exe
+                </a>
+            </div>
+
+            <div class="download-note">
+                ⚠️ &nbsp;Windows Defender может предупредить о незнакомом приложении — это нормально для бета-версий. Нажмите «Подробнее» → «Выполнить в любом случае».
+            </div>
+
+            <!-- Two-col: other versions + system requirements -->
+            <div class="download-grid">
+                <!-- Other versions -->
+                <div class="sysreq-card">
+                    <h3>Другие платформы</h3>
+                    <div class="sysreq-row">
+                        <span class="label"><i class="fa-brands fa-apple"></i> MacOS</span>
+                        <span class="val" style="color:var(--text-muted);">Не планируется</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label"><i class="fa-brands fa-linux"></i> Linux</span>
+                        <span class="val" style="color:var(--text-muted);">Скоро</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label"><i class="fa-brands fa-android"></i> Android</span>
+                        <span class="val" style="color:var(--text-muted);">Не планируется</span>
+                    </div>
+                </div>
+
+                <!-- System requirements -->
+                <div class="sysreq-card">
+                    <h3>Системные требования</h3>
+                    <div class="sysreq-row">
+                        <span class="label">ОС</span>
+                        <span class="val">Windows 10 / 11 (64-bit)</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label">Процессор</span>
+                        <span class="val">Intel / AMD, 2+ ГГц</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label">ОЗУ</span>
+                        <span class="val">>1ГБ</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label">Место на диске</span>
+                        <span class="val">Неизвестно покашто)</span>
+                    </div>
+                    <div class="sysreq-row">
+                        <span class="label">Интернет</span>
+                        <span class="val">Для активации и обновлений</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПРЕВЬЮ ПРИЛОЖЕНИЯ -->
+            <!-- 
+                КАК ЗАМЕНИТЬ ЗАГЛУШКИ:
+                
+                Скриншот (imgur или любая ссылка):
+                  Замени <div class="preview-placeholder">...</div>
+                  на <img src="https://i.imgur.com/XXXXX.png" alt="описание">
+                  
+                YouTube видео:
+                  Замени <div class="preview-placeholder">...</div>
+                  на <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe>
+                  
+                Убери/оставь .preview-badge по вкусу.
+            -->
+            <section class="preview-section">
+                <h2>Как это выглядит</h2>
+                <p class="section-sub">Демонстрация и скриншоты приложения</p>
+
+                <div class="preview-grid">
+
+                    <!-- Большое видео — главная демонстрация -->
+                    <div class="preview-slot wide" id="preview-main">
+                        <div class="preview-badge">📹 Демо</div>
+                        <iframe src="https://www.youtube.com/embed/7ppJvWxHrqM?rel=0&modestbranding=1" allowfullscreen></iframe>
+                    </div>
+
+                    <!-- Скриншот 1 -->
+                    <div class="preview-slot" id="preview-screen-1">
+                        <div class="preview-badge">🖥 Интерфейс</div>
+                        <img src="https://i.imgur.com/j6ZhWW7.png" alt="Главный экран Вайб" referrerpolicy="no-referrer">
+                    </div>
+
+                    <!-- Скриншот 2 -->
+                    <div class="preview-slot" id="preview-screen-2">
+                        <div class="preview-badge">🎙 Команды</div>
+                        <img src="https://i.imgur.com/qHPjZbk.png" alt="Голосовые команды" referrerpolicy="no-referrer">
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section class="faq-section">
+                <h2>Частые вопросы</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Почему Windows Defender ругается на установщик?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Это нормальное поведение для любого нового приложения без дорогостоящей цифровой подписи.
+                        Вайб не содержит вредоносного кода — просто нажмите «Подробнее» → «Выполнить в любом случае».
+                        В будущих версиях планируем добавить сертификат.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Нужен ли интернет для работы?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Базовые голосовые команды (открытие приложений, управление системой) работают полностью офлайн.
+                        Интернет нужен только для активации аккаунта, обновлений и ИИ-функций в чате.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Какой микрофон лучше подходит?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Подойдёт любой микрофон — встроенный в ноутбук, USB или 3.5mm. Для лучшего
+                        распознавания рекомендуем использовать гарнитуру или направленный микрофон
+                        и находиться в тихом месте.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Можно ли использовать бесплатно?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Да! Базовый функционал доступен бесплатно (тариф Free). Платные тарифы Basic и Pro
+                        с расширенными возможностями появятся позже. Следи за обновлениями.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Вайб записывает разговоры?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Нет. Микрофон активируется только по кодовому слову или кнопке, запись не ведётся
+                        в фоне. Данные голосовых команд не передаются на серверы.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Changelog -->
+            <section class="changelog">
+                <h2>Changelog</h2>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">v0.1</div>
+                        <div class="date">26 фев 2026</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>Big Update</h4>
+                        <div class="changelog-tags">
+                            <span class="tag fix">New</span>
+                            <!-- <span class="tag perf">Fix</span> -->
+                        </div>
+                        <ul class="changelog-list">
+                            <li>Добавлено улучшенное распознование</li>
+                            <li>Автокряк Spotify</li>
+                            <li>Доиграет за вас в CS2</li>
+                            <li>Подскажет советы в доте</li>
+                            <li>Поможет с музыкальным вкусом</li>
+                            <li>"Вайб, я кушаю" и он сам включает интересный ролик про секретные файлы Эпштейна!</li>
+                            <li>Интеграция с ИИ прямо в приложении для разговоров</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">v0.3.1</div>
+                        <div class="date">26 янв 2026</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>Бета — патч-обновление</h4>
+                        <div class="changelog-tags">
+                            <span class="tag fix">fix</span>
+                            <span class="tag perf">perf</span>
+                        </div>
+                        <ul class="changelog-list">
+                            <li>Исправлен краш при открытии YouTube без активного браузера</li>
+                            <li>Уменьшено использование RAM в режиме ожидания на ~30%</li>
+                            <li>Фикс: команда «Пауза» не срабатывала в Spotify на Windows 11</li>
+                            <li>Улучшена скорость распознавания голосовых команд</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">v0.3.0</div>
+                        <div class="date">10 янв 2026</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>Сортировка файлов и медиа-контроль</h4>
+                        <div class="changelog-tags">
+                            <span class="tag new">new</span>
+                            <span class="tag improve">improve</span>
+                        </div>
+                        <ul class="changelog-list">
+                            <li>Добавлена автосортировка файлов по папкам (Docs, Py, Img, Media, Web)</li>
+                            <li>Новые команды управления медиаплеером: следующий трек, предыдущий, перемотка</li>
+                            <li>Поддержка нескольких мониторов</li>
+                            <li>Переработан интерфейс настроек</li>
+                            <li>Добавлены таймеры с уведомлениями</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">v0.2.0</div>
+                        <div class="date">15 дек 2025</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>Браузер и YouTube</h4>
+                        <div class="changelog-tags">
+                            <span class="tag new">new</span>
+                            <span class="tag fix">fix</span>
+                        </div>
+                        <ul class="changelog-list">
+                            <li>Команды для браузера: открыть сайт, новая вкладка, закрыть</li>
+                            <li>Поиск на YouTube голосом — «Включи lo-fi»</li>
+                            <li>Регулировка громкости системы и приложений</li>
+                            <li>Исправлены множественные краши при старте</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">v0.1.0</div>
+                        <div class="date">1 ноя 2025</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>Первый публичный релиз</h4>
+                        <div class="changelog-tags">
+                            <span class="tag new">new</span>
+                        </div>
+                        <ul class="changelog-list">
+                            <li>Базовое распознавание голосовых команд</li>
+                            <li>Открытие приложений по имени</li>
+                            <li>Блокнот с голосовым вводом</li>
+                            <li>Диспетчер задач через голос</li>
+                        </ul>
+                    </div>
+                </div> -->
+            </section>
+        </main>
+
+        <footer>
+            <div class="secret-note">Возможно подстройка под ваш характер ;)</div>
+            <div>DESIGNED BY REUZ0201 &copy; 2026</div>
+        </footer>
+    </div>
+
+    <!-- Модалки (стандартный набор) -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <div class="modal" id="write-review-modal">
+        <div class="modal-header">
+            <h2>Оставить отзыв</h2>
+            <button class="modal-close" id="close-write-review">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="write-review-form">
+                <div class="star-rating">
+                    <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+                    <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                    <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                    <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                    <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                </div>
+                <textarea id="review-text" placeholder="Ваш отзыв" rows="4" maxlength="1000" required></textarea>
+                <button type="submit">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="login-modal">
+        <div class="modal-header">
+            <h2>Вход</h2>
+            <button class="modal-close" id="close-login">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <div class="password-wrapper">
+                    <input type="password" id="login-password" placeholder="Пароль" required>
+                    <button type="button" class="toggle-password">👁</button>
+                </div>
+                <button type="submit">Войти</button>
+                <button type="button" class="forgot-password" id="forgot-password-btn">Забыли пароль?</button>
+            </form>
+            <p>Нет аккаунта? <a id="switch-to-register" class="switch-link">Зарегистрироваться</a></p>
+        </div>
+    </div>
+
+    <div class="modal" id="register-modal">
+        <div class="modal-header">
+            <h2>Регистрация</h2>
+            <button class="modal-close" id="close-register">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="register-step1">
+                <form id="register-form-step1">
+                    <input type="text" id="register-name" placeholder="Имя" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <div class="password-wrapper">
+                        <input type="password" id="register-password" placeholder="Пароль" required>
+                        <button type="button" class="toggle-password">👁</button>
+                    </div>
+                    <div class="password-wrapper">
+                        <input type="password" id="register-confirm" placeholder="Подтверждение пароля" required>
+                        <button type="button" class="toggle-password">👁</button>
+                    </div>
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+            </div>
+            <div id="register-step2" style="display:none;">
+                <p>На ваш email отправлен код подтверждения.</p>
+                <input type="text" id="verification-code" placeholder="Введите код">
+                <button id="verify-code">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-header">
+            <h2>Настройки</h2>
+            <button class="modal-close" id="close-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-item">
+                <label>Тема оформления</label>
+                <div class="theme-toggle">
+                    <button id="theme-dark" class="active">Тёмная</button>
+                    <button id="theme-light">Светлая</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>Количество частиц на фоне</label>
+                <select id="particle-count">
+                    <option value="90">Обычно</option>
+                    <option value="30">Мало</option>
+                    <option value="0">Отключить</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="dropdown-menu" id="dropdown-menu">
+        <a href="profile.html" class="dropdown-item">Профиль</a>
+        <a href="#" class="dropdown-item" id="settings-menu-item">Настройки</a>
+        <button class="dropdown-item" id="dropdown-logout">Выйти</button>
+    </div>
+
+    <script type="module" src="script-download.js"></script>
+    <script>
+        function handleDownload(e) {
+            e.preventDefault();
+            const btn = document.getElementById('main-download-btn');
+            btn.textContent = '⏳ Подготовка...';
+            setTimeout(() => {
+                btn.textContent = '✓ Ссылка появится скоро';
+                btn.classList.add('disabled');
+            }, 1200);
+            // Когда будет реальный файл: window.location.href = 'https://...';
+        }
+        document.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('toggle-password')) return;
+            var input = e.target.previousElementSibling;
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+            e.target.textContent = input.type === 'password' ? '👁' : '🙈';
+        });
+    </script>
+    <script>
+        // FAQ аккордеон
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.closest('.faq-item');
+                const wasOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+                if (!wasOpen) item.classList.add('open');
+            });
+        });
+    </script>
+</body>
+</html>

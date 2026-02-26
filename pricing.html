@@ -6,11 +6,18 @@
     <title>Вайб — Тарифы</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style-additions.css">
 </head>
 <body>
     <canvas id="bg-canvas"></canvas>
     <script src="background.js" defer></script>
+    <script src="parallax.js" defer></script>
+    <script src="page-transitions.js" defer></script>
 
+    <!-- Кнопка-облачко для отзыва -->
+    <button class="feedback-bubble" id="feedback-bubble">
+        <span>✍️</span> Написать отзыв
+    </button>
     <!-- Контейнер для уведомлений -->
     <div class="notification-container" id="notification-container"></div>
 
@@ -19,10 +26,9 @@
             <div class="logo">Вайб</div>
             <div class="header-right">
                 <a href="index.html" class="reviews-btn">Главная</a>
-                <div id="user-menu" style="display: none;" class="user-badge">
-                    <span id="user-name"></span>
-                    <a href="profile.html" style="color: var(--accent-color); text-decoration: none; margin: 0 5px;">👤</a>
-                    <button class="logout-btn" id="logout-btn">⏻</button>
+                <a href="reviews.html" class="reviews-btn">Отзывы</a>
+                <div id="user-avatar-container" style="display: none;">
+                    <img id="user-avatar-img" src="" alt="avatar" class="user-avatar">
                 </div>
                 <button class="login-btn" id="login-btn">Войти</button>
             </div>
@@ -31,34 +37,81 @@
         <main>
             <section class="pricing-section">
                 <h2>Выберите тариф</h2>
+                <p style="text-align:center;color:var(--text-dim);margin-top:-10px;margin-bottom:30px;font-size:0.9rem;">
+                    Честно говоря, цены ещё не придумали. Но карточки выглядят красиво 👀
+                </p>
                 <div class="pricing-grid">
                     <div class="pricing-card">
+                        <div style="font-size:2rem;margin-bottom:8px;">🐣</div>
                         <h3>Free</h3>
-                        <div class="price">—</div>
+                        <div class="price" style="font-size:1.1rem;color:var(--text-dim);">Бесплатно</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:8px 0 16px;font-style:italic;">"Для тех, кто хочет попробовать, но боится разочароваться"</p>
                         <ul>
                             <li>Ограниченные запросы</li>
                             <li>Ограниченные команды</li>
-
+                            <li style="color:var(--text-muted);text-decoration:line-through;">Безлимит</li>
+                            <li style="color:var(--text-muted);text-decoration:line-through;">Приоритет поддержки</li>
+                            <li style="color:var(--text-muted);text-decoration:line-through;">Чувство превосходства</li>
                         </ul>
+                        <div style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);">⚠️ Может вызвать желание перейти на Basic</div>
                     </div>
-                    <div class="pricing-card">
+                    <div class="pricing-card" style="border-color:rgba(0,242,255,0.4);position:relative;overflow:visible;">
+                        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--accent-color);color:#000;font-size:0.7rem;font-weight:700;padding:3px 14px;border-radius:20px;white-space:nowrap;">популярный (наверное)</div>
+                        <div style="font-size:2rem;margin-bottom:8px;">🚀</div>
                         <h3>Basic</h3>
-                        <div class="price">—</div>
+                        <div class="price" style="font-size:1.1rem;color:var(--accent-color);">Скоро™</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:8px 0 16px;font-style:italic;">"Для серьёзных людей с несерьёзным бюджетом"</p>
                         <ul>
                             <li>Все команды</li>
                             <li>Доступ к маркетплейсу</li>
-                            <li>Поддержка</li>
+                            <li>Поддержка (живой человек, мы обещаем)</li>
+                            <li>Чувство лёгкого превосходства над Free</li>
                         </ul>
+                        <div style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);">✅ Ваши коллеги не узнают, что вы экономили</div>
                     </div>
-                    <div class="pricing-card">
+                    <div class="pricing-card" style="border-color:rgba(124,77,255,0.5);">
+                        <div style="font-size:2rem;margin-bottom:8px;">👑</div>
                         <h3>Pro</h3>
-                        <div class="price">—</div>
+                        <div class="price" style="font-size:1.1rem;color:#7c4dff;">⚡ Скоро™</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:8px 0 16px;font-style:italic;">"Для тех, кто уже платит за Netflix, Spotify и теперь ещё сюда"</p>
                         <ul>
                             <li>Все функции Basic</li>
                             <li>Подключение других устройств</li>
-                            <li></li>
+                            <li>Приоритетная поддержка</li>
+                            <li>Право хвастаться Pro-статусом</li>
                         </ul>
+                        <div style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);">💜 Ваша кошка тоже оценит</div>
                     </div>
+                </div>
+
+                <!-- Пасхалка -->
+                <div style="text-align:center;margin-top:40px;">
+                    <button id="secret-tier-btn" style="background:none;border:none;color:var(--text-muted);font-size:0.75rem;cursor:pointer;text-decoration:underline dotted;opacity:0.4;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.4'">
+                        я ищу что-то особенное...
+                    </button>
+                </div>
+                <div id="secret-tier" style="display:none;margin-top:24px;max-width:340px;margin-left:auto;margin-right:auto;">
+                    <div class="pricing-card" style="border-color:rgba(255,102,204,0.6);background:rgba(255,102,204,0.05);animation:orb-breathe 3s infinite;">
+                        <div style="font-size:2.5rem;margin-bottom:8px;">✨</div>
+                        <h3 style="color:#ff66cc;">Limitless</h3>
+                        <div class="price" style="font-size:1.1rem;color:#ff66cc;">∞ / душа</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:8px 0 16px;font-style:italic;">"Для избранных. Возможно, вы один из них."</p>
+                        <ul>
+                            <li>Абсолютно всё</li>
+                            <li>Подстройка под характер</li>
+                            <li>Прямая линия со мной</li>
+                            <li>Возможность назвать фичу</li>
+                            <li style="color:#ff66cc;">Статус "Легенда"</li>
+                        </ul>
+                        <div style="margin-top:16px;font-size:0.75rem;color:var(--text-muted);">🌸 Получается только по приглашению</div>
+                    </div>
+                </div>
+
+                <div style="text-align:center;margin-top:50px;padding:20px;border:1px solid var(--glass-border);border-radius:20px;background:var(--surface);">
+                    <p style="color:var(--text-dim);font-size:0.85rem;margin:0;">
+                        💡 Цены появятся когда продукт будет готов.<br>
+                        <span style="font-size:0.75rem;color:var(--text-muted);">Спойлер: будет дёшево. Или нет. Зависит от настроения.</span>
+                    </p>
                 </div>
             </section>
         </main>
@@ -69,7 +122,138 @@
         </footer>
     </div>
 
-    <!-- Подключаем Firebase и скрипт для страницы тарифов -->
+    <!-- Модальные окна -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <!-- Модалка отзывов -->
+    <div class="modal" id="reviews-modal">
+        <div class="modal-header">
+            <h2>Все отзывы</h2>
+            <button class="modal-close" id="close-reviews">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="reviews-list"></div>
+        </div>
+    </div>
+
+    <!-- Модалка написания отзыва -->
+    <div class="modal" id="write-review-modal">
+        <div class="modal-header">
+            <h2>Оставить отзыв</h2>
+            <button class="modal-close" id="close-write-review">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="write-review-form">
+                <div class="star-rating">
+                    <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+                    <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                    <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                    <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                    <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                </div>
+                <textarea id="review-text" placeholder="Ваш отзыв" rows="4" required></textarea>
+                <button type="submit">Отправить</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модалка входа -->
+    <div class="modal" id="login-modal">
+        <div class="modal-header">
+            <h2>Вход</h2>
+            <button class="modal-close" id="close-login">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <div class="password-wrapper"><input type="password" id="login-password" placeholder="Пароль" required><button type="button" class="toggle-password">👁</button></div>
+                <button type="submit">Войти</button>
+                <button type="button" class="forgot-password" id="forgot-password-btn">Забыли пароль?</button>
+            </form>
+            <p>Нет аккаунта? <a id="switch-to-register" class="switch-link">Зарегистрироваться</a></p>
+        </div>
+    </div>
+
+    <!-- Модалка регистрации -->
+    <div class="modal" id="register-modal">
+        <div class="modal-header">
+            <h2>Регистрация</h2>
+            <button class="modal-close" id="close-register">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="register-step1">
+                <form id="register-form-step1">
+                    <input type="text" id="register-name" placeholder="Имя" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <div class="password-wrapper"><input type="password" id="register-password" placeholder="Пароль" required><button type="button" class="toggle-password">👁</button></div>
+                    <div class="password-wrapper"><input type="password" id="register-confirm" placeholder="Подтверждение пароля" required><button type="button" class="toggle-password">👁</button></div>
+                    <button type="submit">Зарегистрироваться</button>
+                </form>
+            </div>
+            <div id="register-step2" style="display: none;">
+                <p>На ваш email отправлен код подтверждения. (Симуляция: код <strong id="display-code"></strong>)</p>
+                <input type="text" id="verification-code" placeholder="Введите код">
+                <button id="verify-code">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка настроек -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-header">
+            <h2>Настройки</h2>
+            <button class="modal-close" id="close-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-item">
+                <label>Тема оформления</label>
+                <div class="theme-toggle">
+                    <button id="theme-dark" class="active">Тёмная</button>
+                    <button id="theme-light">Светлая</button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>Количество частиц на фоне</label>
+                <select id="particle-count">
+                    <option value="90">Обычно</option>
+                    <option value="30">Мало</option>
+                    <option value="0">Отключить</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Выпадающее меню аватарки -->
+    <div class="dropdown-menu" id="dropdown-menu">
+        <a href="profile.html" class="dropdown-item">Профиль</a>
+        <a href="#" class="dropdown-item" id="settings-menu-item">Настройки</a>
+        <button class="dropdown-item" id="dropdown-logout">Выйти</button>
+    </div>
+
     <script type="module" src="script-pricing.js"></script>
+    <script>
+        document.getElementById('secret-tier-btn').addEventListener('click', function() {
+            const tier = document.getElementById('secret-tier');
+            const isHidden = tier.style.display === 'none';
+            tier.style.display = isHidden ? 'block' : 'none';
+            this.textContent = isHidden ? 'скрыть секретное...' : 'я ищу что-то особенное...';
+            if (isHidden) {
+                tier.style.opacity = '0';
+                tier.style.transform = 'translateY(20px)';
+                tier.style.transition = 'opacity 0.5s, transform 0.5s';
+                setTimeout(() => { tier.style.opacity = '1'; tier.style.transform = 'translateY(0)'; }, 10);
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener("click", function(e) {
+            if (!e.target.classList.contains("toggle-password")) return;
+            var input = e.target.previousElementSibling;
+            if (!input) return;
+            var isPassword = input.type === "password";
+            input.type = isPassword ? "text" : "password";
+            e.target.textContent = isPassword ? "🙈" : "👁";
+        });
+    </script>
 </body>
 </html>

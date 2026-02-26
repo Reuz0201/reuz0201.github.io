@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вайб — 404</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .error-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .error-visual {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 40px;
+        }
+
+        .error-orb {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 70px; height: 70px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 60px rgba(0,242,255,0.4);
+            animation: orb-breathe 3s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        @keyframes orb-breathe {
+            0%, 100% { transform: translate(-50%, -50%) scale(1);   box-shadow: 0 0 40px rgba(0,242,255,0.3); }
+            50%       { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 80px rgba(0,242,255,0.5); }
+        }
+
+        .error-ring {
+            position: absolute;
+            top: 50%; left: 50%;
+            border-radius: 50%;
+            border: 1px solid rgba(0,242,255,0.2);
+            transform: translate(-50%, -50%);
+            animation: rotate-wave 10s linear infinite;
+        }
+        .error-ring:nth-child(1) { width: 120px; height: 120px; }
+        .error-ring:nth-child(2) { width: 160px; height: 160px; animation-direction: reverse; animation-duration: 14s; }
+
+        .error-code {
+            font-size: 7rem;
+            font-weight: 200;
+            letter-spacing: -6px;
+            line-height: 1;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-main) 30%, var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .error-title {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .error-subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            font-weight: 300;
+            max-width: 380px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .error-btn {
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-btn.primary {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            box-shadow: 0 8px 24px rgba(0,242,255,0.3);
+        }
+        .error-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,242,255,0.5);
+        }
+
+        .error-btn.secondary {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+        .error-btn.secondary:hover {
+            border-color: var(--border-accent);
+            color: var(--accent-color);
+            background: rgba(0,242,255,0.05);
+        }
+
+        /* Плавающие цифры */
+        .float-num {
+            position: fixed;
+            font-size: 0.7rem;
+            color: rgba(0,242,255,0.15);
+            font-family: monospace;
+            pointer-events: none;
+            animation: float-up linear infinite;
+        }
+
+        @keyframes float-up {
+            from { transform: translateY(0); opacity: 0.15; }
+            to   { transform: translateY(-100vh); opacity: 0; }
+        }
+
+        /* Счётчик обратного редиректа */
+        .redirect-hint {
+            margin-top: 32px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        #redirect-count {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <script src="background.js" defer></script>
+    <script src="parallax.js" defer></script>
+
+    <div class="container">
+        <header>
+            <div class="logo">Вайб</div>
+            <div class="header-right">
+                <a href="index.html"    class="reviews-btn">Главная</a>
+                <a href="download.html" class="reviews-btn">Скачать</a>
+                <a href="pricing.html"  class="reviews-btn">Тарифы</a>
+                <a href="reviews.html"  class="reviews-btn">Отзывы</a>
+            </div>
+        </header>
+
+        <main>
+            <div class="error-page">
+                <div class="error-visual">
+                    <div class="error-ring"></div>
+                    <div class="error-ring"></div>
+                    <div class="error-orb">?</div>
+                </div>
+
+                <div class="error-code">404</div>
+                <h1 class="error-title">Страница не найдена</h1>
+                <p class="error-subtitle">
+                    Вайб не смог найти эту страницу. Возможно, ссылка устарела
+                    или страница была удалена.
+                </p>
+
+                <div class="error-actions">
+                    <a href="index.html" class="error-btn primary">
+                        ← Вернуться на главную
+                    </a>
+                    <a href="javascript:history.back()" class="error-btn secondary">
+                        Назад
+                    </a>
+                </div>
+
+                <div class="redirect-hint">
+                    Автоматический редирект через <span id="redirect-count">10</span> сек
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="secret-note">Возможно подстройка под ваш характер ;)</div>
+            <div>DESIGNED BY REUZ0201 &copy; 2026</div>
+        </footer>
+    </div>
+
+    <script>
+        // Плавающие числа для атмосферы
+        for (let i = 0; i < 20; i++) {
+            const el = document.createElement('div');
+            el.className = 'float-num';
+            el.textContent = Math.random() > 0.5 ? '404' : '0x' + Math.floor(Math.random()*256).toString(16).padStart(2,'0');
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.top  = Math.random() * 100 + 'vh';
+            el.style.animationDuration = (8 + Math.random() * 12) + 's';
+            el.style.animationDelay    = (Math.random() * 8) + 's';
+            document.body.appendChild(el);
+        }
+
+        // Обратный отсчёт редиректа
+        let count = 10;
+        const countEl = document.getElementById('redirect-count');
+        const timer = setInterval(() => {
+            count--;
+            if (countEl) countEl.textContent = count;
+            if (count <= 0) {
+                clearInterval(timer);
+                window.location.href = 'index.html';
+            }
+        }, 1000);
+
+        // Если пользователь кликнул — отменяем редирект
+        document.querySelectorAll('.error-btn').forEach(btn => {
+            btn.addEventListener('click', () => clearInterval(timer));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+/* ================================================================
+   ADDITIONS — добавь это в конец style.css
+   ================================================================ */
+
+/* ────────────────────────────────────────────
+   1. АНИМИРОВАННЫЙ ЛОГОТИП
+   ──────────────────────────────────────────── */
+.logo {
+    position: relative;
+    cursor: default;
+    user-select: none;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    left: -10px; top: 50%;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent-color);
+    animation: logo-dot-pulse 2.5s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.logo:hover::before {
+    opacity: 1;
+}
+
+.logo-animated {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+}
+
+.logo-char {
+    display: inline-block;
+    transition: color 0.15s, transform 0.15s;
+}
+
+.logo:hover .logo-char {
+    animation: logo-wave 0.6s ease forwards;
+}
+
+.logo:hover .logo-char:nth-child(1) { animation-delay: 0s; }
+.logo:hover .logo-char:nth-child(2) { animation-delay: 0.05s; }
+.logo:hover .logo-char:nth-child(3) { animation-delay: 0.1s; }
+.logo:hover .logo-char:nth-child(4) { animation-delay: 0.15s; }
+
+@keyframes logo-wave {
+    0%   { transform: translateY(0); color: var(--text-main); }
+    40%  { transform: translateY(-5px); color: var(--accent-color); }
+    100% { transform: translateY(0); color: var(--text-main); }
+}
+
+@keyframes logo-dot-pulse {
+    0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    50%       { opacity: 0.4; transform: translateY(-50%) scale(0.5); }
+}
+
+/* ────────────────────────────────────────────
+   2. ПЕРЕХОДЫ МЕЖДУ СТРАНИЦАМИ
+   ──────────────────────────────────────────── */
+body {
+    animation: page-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@keyframes page-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Класс добавляется JS перед переходом */
+body.page-exit {
+    animation: page-out 0.25s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes page-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-10px); }
+}
+
+/* ────────────────────────────────────────────
+   3. SKELETON ЗАГРУЗКА (улучшенная)
+   ──────────────────────────────────────────── */
+.rv-skeleton {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    overflow: hidden;
+}
+
+.skeleton-line {
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.09) 50%,
+        rgba(255,255,255,0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+    height: 14px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.skeleton-avatar {
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.04) 0%,
+        rgba(255,255,255,0.09) 50%,
+        rgba(255,255,255,0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    flex-shrink: 0;
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+
+/* Страница-скелетон для reviews.html */
+.reviews-full-grid .rv-skeleton {
+    animation: fade-in-up-card 0.4s ease both;
+}
+.reviews-full-grid .rv-skeleton:nth-child(1) { animation-delay: 0s; }
+.reviews-full-grid .rv-skeleton:nth-child(2) { animation-delay: 0.06s; }
+.reviews-full-grid .rv-skeleton:nth-child(3) { animation-delay: 0.12s; }
+.reviews-full-grid .rv-skeleton:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes fade-in-up-card {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ────────────────────────────────────────────
+   4. ИСТОРИЯ АКТИВНОСТИ (profile)
+   ──────────────────────────────────────────── */
+.activity-section {
+    margin-top: 32px;
+}
+
+.activity-section h3 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(0,242,255,0.08);
+    border: 1px solid var(--border-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-size: 0.88rem;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.activity-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.activity-empty {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* ────────────────────────────────────────────
+   5. FAQ СЕКЦИЯ (download.html)
+   ──────────────────────────────────────────── */
+.faq-section {
+    margin-bottom: 80px;
+}
+
+.faq-section h2 {
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
+}
+
+.faq-item {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.faq-item:hover {
+    border-color: var(--border-accent);
+}
+
+.faq-question {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text-main);
+    font-size: 0.92rem;
+    font-weight: 500;
+    gap: 12px;
+    border-radius: 0;
+}
+
+.faq-question:hover {
+    background: rgba(0,242,255,0.03);
+}
+
+.faq-arrow {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    transition: transform 0.25s;
+    flex-shrink: 0;
+}
+
+.faq-item.open .faq-arrow {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), padding 0.2s;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    padding: 0 22px;
+}
+
+.faq-item.open .faq-answer {
+    max-height: 300px;
+    padding: 0 22px 18px;
+}
+
+/* ────────────────────────────────────────────
+   6. УВЕДОМЛЕНИЯ В РЕАЛЬНОМ ВРЕМЕНИ
+   ──────────────────────────────────────────── */
+.realtime-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: var(--accent-color);
+    background: rgba(0,242,255,0.08);
+    border: 1px solid var(--border-accent);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.realtime-dot {
+    width: 6px; height: 6px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ────────────────────────────────────────────
+   7. МОБИЛЬНЫЙ АДАПТИВ (улучшения)
+   ──────────────────────────────────────────── */
+
+/* Хедер не перекрывает контент на мобилке */
+@media (max-width: 768px) {
+    /* Pricing */
+    .pricing-grid {
+        grid-template-columns: 1fr !important;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Download page */
+    .download-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .download-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .download-hero h1 {
+        font-size: 2rem !important;
+    }
+    .btn-download {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Reviews page */
+    .reviews-full-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .reviews-page-hero h1 {
+        font-size: 2rem;
+    }
+    .reviews-stats {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Changelog */
+    .changelog-item {
+        grid-template-columns: 70px 1fr;
+        gap: 0 10px;
+    }
+    .changelog-version .ver {
+        font-size: 0.78rem;
+    }
+
+    /* Profile */
+    .profile-info {
+        padding: 20px !important;
+    }
+
+    /* FAQ */
+    .faq-question {
+        font-size: 0.85rem;
+        padding: 14px 16px;
+    }
+
+    /* Footer */
+    footer {
+        padding: 24px 0;
+    }
+
+    /* Feedback bubble — убираем текст на совсем маленьких экранах */
+    @media (max-width: 380px) {
+        .feedback-bubble span:last-child {
+            display: none;
+        }
+        .feedback-bubble {
+            padding: 14px 16px;
+            border-radius: 50%;
+        }
+    }
+}
+
+/* Tablet */
+@media (max-width: 960px) and (min-width: 769px) {
+    .pricing-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .pricing-grid .pricing-card:last-child {
+        grid-column: 1 / -1;
+        max-width: 340px;
+        margin: 0 auto;
+    }
+    .reviews-full-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ────────────────────────────────────────────
+   8. СТРАНИЦА 404 — orb-breathe (если не объявлена)
+   ──────────────────────────────────────────── */
+@keyframes orb-breathe {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.06); }
+}

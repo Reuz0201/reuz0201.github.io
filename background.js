@@ -1,41 +1,67 @@
 // background.js
 (function() {
     const canvas = document.getElementById('bg-canvas');
-    if (!canvas) return; // если канвас не найден, ничего не делаем
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     let particles = [];
     let mouse = { x: null, y: null };
-    let lastClick = { x: null, y: null, time: 0 };
+    let lastImpulse = { x: null, y: null, time: 0 };
+    let particleCount = 90;
 
-    // Отслеживание мыши
+    // Загружаем настройки из localStorage
+    try {
+        const saved = localStorage.getItem('vibe-particle-setting');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            particleCount = parsed.count;
+        } else {
+            if (window.innerWidth < 768) particleCount = 30;
+        }
+    } catch (e) {
+        console.warn('Failed to load particle setting', e);
+    }
+
+    // Слушаем изменения настроек
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'vibe-particle-setting') {
+            try {
+                const parsed = JSON.parse(e.newValue);
+                particleCount = parsed.count;
+                initParticles();
+            } catch (err) {}
+        }
+    });
+
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
     });
 
-    // Эффект ряби при клике
-    window.addEventListener('click', (e) => {
+    // Автоматический импульс в случайной точке экрана каждые 4 секунды
+    function triggerAutoImpulse() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+
+        // Визуальный ripple эффект
         const ripple = document.createElement('div');
         ripple.className = 'ripple';
-        ripple.style.left = `${e.clientX}px`;
-        ripple.style.top = `${e.clientY}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
         document.body.appendChild(ripple);
         setTimeout(() => ripple.remove(), 800);
-        lastClick.x = e.clientX;
-        lastClick.y = e.clientY;
-        lastClick.time = Date.now();
-    });
 
-    // Подгон размера канваса под окно
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // Обновляем точку импульса для частиц
+        lastImpulse.x = x;
+        lastImpulse.y = y;
+        lastImpulse.time = Date.now();
     }
-    window.addEventListener('resize', resize);
-    resize();
 
-    // Класс частицы
+    // Запускаем автоимпульсы
+    setInterval(triggerAutoImpulse, 4000);
+    // Первый импульс немного с задержкой чтобы частицы успели инициализироваться
+    setTimeout(triggerAutoImpulse, 1500);
+
     class Particle {
         constructor() {
             this.baseX = Math.random() * canvas.width;
@@ -64,24 +90,38 @@
         }
     }
 
-    // Инициализация частиц
     function initParticles() {
         particles = [];
-        for (let i = 0; i < 75; i++) particles.push(new Particle());
+        if (particleCount === 0) return;
+        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
     }
-    initParticles();
 
-    // Анимация
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    let paused = false;
+    document.addEventListener('visibilitychange', () => {
+        paused = document.hidden;
+    });
+
     function animate() {
+        requestAnimationFrame(animate);
+        if (paused) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (particleCount === 0) return;
         const now = Date.now();
-        const clickElapsed = now - lastClick.time;
+        const impulseElapsed = now - lastImpulse.time;
 
         for (let i = 0; i < particles.length; i++) {
             particles[i].update();
             particles[i].draw();
 
-            // Рисование линий между частицами
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
                 const dy = particles[i].y - particles[j].y;
@@ -90,11 +130,13 @@
                     let alpha = 0.3 * (1 - d / 170);
                     let lineWidth = 1;
 
-                    // Эффект волны от клика
-                    if (clickElapsed < 800 && lastClick.x !== null) {
-                        const distToClick = Math.sqrt((particles[i].x - lastClick.x) ** 2 + (particles[i].y - lastClick.y) ** 2);
-                        const waveRadius = (clickElapsed / 800) * 600;
-                        if (Math.abs(distToClick - waveRadius) < 60) {
+                    if (impulseElapsed < 800 && lastImpulse.x !== null) {
+                        const distToImpulse = Math.sqrt(
+                            (particles[i].x - lastImpulse.x) ** 2 +
+                            (particles[i].y - lastImpulse.y) ** 2
+                        );
+                        const waveRadius = (impulseElapsed / 800) * 600;
+                        if (Math.abs(distToImpulse - waveRadius) < 60) {
                             alpha *= 3.5;
                             lineWidth = 2;
                         }
@@ -109,7 +151,6 @@
                 }
             }
         }
-        requestAnimationFrame(animate);
     }
     animate();
 })();
