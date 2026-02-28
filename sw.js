@@ -29,7 +29,6 @@ const PRECACHE = [
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE).then(cache => {
-            // Не блокируем установку если какой-то файл не загрузился
             return Promise.allSettled(
                 PRECACHE.map(url => cache.add(url).catch(() => {}))
             );
@@ -48,28 +47,37 @@ self.addEventListener('activate', event => {
     );
 });
 
-// ── Fetch: Network First для Firebase/API, Cache First для статики ──
+// Домены, которые SW не трогает — браузер обрабатывает сам
+const BYPASS_HOSTNAMES = [
+    'firebaseapp.com',
+    'googleapis.com',
+    'gstatic.com',
+    'firestore.googleapis.com',
+    'identitytoolkit.googleapis.com',
+    'imgbb.com',
+    'i.ibb.co',       // ← CDN-домен imgbb (был пропущен — причина ошибки)
+    'ibb.co',
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+];
+
+function shouldBypass(url) {
+    return BYPASS_HOSTNAMES.some(h => url.hostname.includes(h));
+}
+
+// ── Fetch: Network First для внешних запросов, Cache First для статики ──
 self.addEventListener('fetch', event => {
     const url = new URL(event.request.url);
 
-    // Firebase, Google Fonts, CDN — всегда сеть
-    if (
-        url.hostname.includes('firebaseapp.com') ||
-        url.hostname.includes('googleapis.com') ||
-        url.hostname.includes('gstatic.com') ||
-        url.hostname.includes('firestore.googleapis.com') ||
-        url.hostname.includes('identitytoolkit') ||
-        url.hostname.includes('imgbb.com') ||
-        event.request.method !== 'GET'
-    ) {
-        return; // браузер обрабатывает сам
+    // Пропускаем не-GET и внешние сервисы
+    if (event.request.method !== 'GET' || shouldBypass(url)) {
+        return;
     }
 
-    // Стратегия: сначала сеть, при ошибке — кэш
     event.respondWith(
         fetch(event.request)
             .then(response => {
-                // Кэшируем успешные ответы (только same-origin)
+                // Кэшируем успешные ответы только для same-origin
                 if (response.ok && url.origin === self.location.origin) {
                     const clone = response.clone();
                     caches.open(CACHE).then(cache => cache.put(event.request, clone));
@@ -77,13 +85,22 @@ self.addEventListener('fetch', event => {
                 return response;
             })
             .catch(() => {
-                // Сеть недоступна — берём из кэша
+                // Сеть недоступна — ищем в кэше
                 return caches.match(event.request).then(cached => {
                     if (cached) return cached;
-                    // Для HTML-страниц — офлайн-заглушка из главной
+
+                    // Для HTML — отдаём главную как офлайн-заглушку
                     if (event.request.headers.get('accept')?.includes('text/html')) {
                         return caches.match('/index.html');
                     }
+
+                    // ← Раньше здесь возвращался undefined → TypeError
+                    // Теперь явно возвращаем 503, чтобы браузер получил корректный Response
+                    return new Response('Офлайн: ресурс недоступен', {
+                        status: 503,
+                        statusText: 'Service Unavailable',
+                        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                    });
                 });
             })
     );

@@ -1,7 +1,85 @@
 // script-download.js
 import { auth, db, showNotification, getPlaceholderDataURL, toggleDropdownMenu } from './firebase.js';
 import { signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+// ── Загрузка Changelog из Firestore ──
+const TAG_COLORS = {
+    new:      '#00f2ff',
+    fix:      '#ff6b6b',
+    improve:  '#fbbf24',
+    remove:   '#a78bfa',
+    security: '#34d399',
+};
+const TAG_LABELS = {
+    new:      '✨ Новое',
+    fix:      '🔧 Исправление',
+    improve:  '⚡ Улучшение',
+    remove:   '🗑 Удалено',
+    security: '🔒 Безопасность',
+};
+
+async function loadChangelog() {
+    const container = document.getElementById('changelog-container');
+    if (!container) return;
+
+    try {
+        const q = query(collection(db, 'changelog'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+            container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px 0;">Записей пока нет</p>';
+            return;
+        }
+
+        let html = '';
+        snap.forEach(d => {
+            const entry = d.data();
+
+            // Теги
+            const tagsHtml = (entry.tags || []).map(t => {
+                const color = TAG_COLORS[t] || '#888';
+                const label = TAG_LABELS[t] || t;
+                return `<span class="tag" style="
+                    background:${color}18;
+                    color:${color};
+                    border:1px solid ${color}40;
+                    border-radius:20px;
+                    padding:2px 10px;
+                    font-size:0.72rem;
+                    font-weight:500;
+                    letter-spacing:0.3px;
+                ">${label}</span>`;
+            }).join('');
+
+            // Список изменений
+            const changesHtml = (entry.changes || [])
+                .map(c => `<li>${c}</li>`)
+                .join('');
+
+            html += `
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <div class="ver">${entry.version}</div>
+                        <div class="date">${entry.date || ''}</div>
+                    </div>
+                    <div class="changelog-content">
+                        <h4>${entry.title}</h4>
+                        ${tagsHtml ? `<div class="changelog-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">${tagsHtml}</div>` : ''}
+                        <ul class="changelog-list">${changesHtml}</ul>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Changelog load error:', err);
+        container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px 0;">Не удалось загрузить changelog</p>';
+    }
+}
+
+loadChangelog();
 
 const loginBtn            = document.getElementById('login-btn');
 const userAvatarContainer = document.getElementById('user-avatar-container');

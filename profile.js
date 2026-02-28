@@ -13,8 +13,11 @@ import {
     updateDoc,
     collection,
     getDocs,
+    addDoc,
+    deleteDoc,
     query,
     where,
+    orderBy,
     writeBatch,
     Timestamp,
     setDoc,
@@ -623,7 +626,10 @@ async function loadProfile(user) {
 
             let adminButtonHtml = '';
             if (isAdmin) {
-                adminButtonHtml = '<button id="admin-panel-btn" class="reviews-btn" style="margin-left: 10px;">👑 Админ-панель</button>';
+                adminButtonHtml = `
+                    <button id="admin-panel-btn" class="reviews-btn" style="margin-left: 10px;">👑 Админ-панель</button>
+                    <button id="changelog-btn" class="reviews-btn" style="margin-left: 10px;">📝 Запись обновления</button>
+                `;
             }
 
             profileContainer.innerHTML = `
@@ -660,6 +666,7 @@ async function loadProfile(user) {
 
             if (isAdmin) {
                 document.getElementById('admin-panel-btn').addEventListener('click', openAdminPanel);
+                document.getElementById('changelog-btn').addEventListener('click', openChangelogModal);
             }
         } else {
             profileContainer.innerHTML = '<div style="text-align: center; color: var(--text-dim);">Данные пользователя не найдены</div>';
@@ -690,6 +697,277 @@ function closeAdminPanel() {
 
 closeAdminModalBtn?.addEventListener('click', closeAdminPanel);
 adminModalOverlay?.addEventListener('click', closeAdminPanel);
+
+// =====================================================================
+// CHANGELOG — создание записей обновлений
+// =====================================================================
+
+const AVAILABLE_TAGS = [
+    { id: 'new',     label: '✨ Новое',      color: '#00f2ff' },
+    { id: 'fix',     label: '🔧 Исправление', color: '#ff6b6b' },
+    { id: 'improve', label: '⚡ Улучшение',   color: '#fbbf24' },
+    { id: 'remove',  label: '🗑 Удалено',     color: '#a78bfa' },
+    { id: 'security',label: '🔒 Безопасность',color: '#34d399' },
+];
+
+function openChangelogModal() {
+    // Создаём модалку если её нет
+    let overlay = document.getElementById('changelog-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'changelog-overlay';
+        overlay.style.cssText = `
+            position:fixed;inset:0;z-index:9000;
+            background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+            display:flex;align-items:center;justify-content:center;
+            padding:20px;
+        `;
+
+        overlay.innerHTML = `
+            <div id="changelog-modal-box" style="
+                background:var(--modal-bg,#1a1d21);
+                border:1px solid rgba(0,242,255,0.2);
+                border-radius:24px;
+                padding:32px;
+                max-width:600px;
+                width:100%;
+                max-height:90vh;
+                overflow-y:auto;
+                position:relative;
+            ">
+                <button id="changelog-modal-close" style="
+                    position:absolute;top:16px;right:18px;
+                    background:none;border:none;font-size:1.5rem;
+                    color:var(--text-dim);cursor:pointer;line-height:1;
+                ">&times;</button>
+
+                <h2 style="font-size:1.2rem;font-weight:500;margin-bottom:24px;color:var(--text-main);">
+                    📝 Новая запись обновления
+                </h2>
+
+                <form id="changelog-form">
+
+                    <!-- Версия + дата -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div>
+                            <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px;">
+                                Версия <span style="color:#ff6b6b;">*</span>
+                            </label>
+                            <input id="cl-version" type="text" placeholder="v0.2"
+                                style="width:100%;background:var(--surface);border:1px solid var(--border);
+                                border-radius:12px;padding:10px 14px;color:var(--text-main);
+                                font-family:Inter,sans-serif;font-size:0.9rem;box-sizing:border-box;"
+                                required>
+                        </div>
+                        <div>
+                            <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px;">
+                                Дата <span style="color:#ff6b6b;">*</span>
+                            </label>
+                            <input id="cl-date" type="date"
+                                style="width:100%;background:var(--surface);border:1px solid var(--border);
+                                border-radius:12px;padding:10px 14px;color:var(--text-main);
+                                font-family:Inter,sans-serif;font-size:0.9rem;box-sizing:border-box;"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Название релиза -->
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:6px;">
+                            Название релиза <span style="color:#ff6b6b;">*</span>
+                        </label>
+                        <input id="cl-title" type="text" placeholder="Первый публичный релиз"
+                            style="width:100%;background:var(--surface);border:1px solid var(--border);
+                            border-radius:12px;padding:10px 14px;color:var(--text-main);
+                            font-family:Inter,sans-serif;font-size:0.9rem;box-sizing:border-box;"
+                            required>
+                    </div>
+
+                    <!-- Теги -->
+                    <div style="margin-bottom:16px;">
+                        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            Теги
+                        </label>
+                        <div id="cl-tags" style="display:flex;flex-wrap:wrap;gap:8px;">
+                            ${AVAILABLE_TAGS.map(t => `
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;
+                                    background:var(--surface);border:1px solid var(--border);
+                                    border-radius:20px;padding:5px 12px;
+                                    font-size:0.8rem;transition:border-color 0.15s;"
+                                    class="cl-tag-label" data-tag="${t.id}">
+                                    <input type="checkbox" value="${t.id}" name="cl-tag"
+                                        style="display:none;">
+                                    <span style="color:${t.color};">${t.label}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Список изменений -->
+                    <div style="margin-bottom:20px;">
+                        <label style="font-size:0.78rem;color:var(--text-muted);display:block;margin-bottom:8px;">
+                            Что изменилось <span style="color:#ff6b6b;">*</span>
+                        </label>
+                        <div id="cl-changes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">
+                            <!-- Строки добавляются динамически -->
+                        </div>
+                        <button type="button" id="cl-add-change" style="
+                            background:rgba(0,242,255,0.06);
+                            border:1px dashed rgba(0,242,255,0.3);
+                            border-radius:12px;padding:8px 16px;
+                            color:var(--accent-color);font-size:0.85rem;
+                            cursor:pointer;width:100%;font-family:Inter,sans-serif;
+                            transition:background 0.15s;
+                        ">+ Добавить пункт</button>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                        <button type="button" id="cl-cancel" style="
+                            padding:10px 22px;border-radius:12px;
+                            background:rgba(255,255,255,0.05);
+                            border:1px solid rgba(255,255,255,0.1);
+                            color:var(--text-dim);cursor:pointer;
+                            font-family:Inter,sans-serif;font-size:0.9rem;
+                        ">Отмена</button>
+                        <button type="submit" id="cl-submit" style="
+                            padding:10px 24px;border-radius:12px;
+                            background:var(--accent-color);
+                            border:none;color:#000;font-weight:600;
+                            cursor:pointer;font-family:Inter,sans-serif;font-size:0.9rem;
+                            transition:opacity 0.15s;
+                        ">Опубликовать</button>
+                    </div>
+
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+        initChangelogModalEvents(overlay);
+    }
+
+    // Сбрасываем форму
+    document.getElementById('changelog-form').reset();
+    document.getElementById('cl-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('cl-changes-list').innerHTML = '';
+    document.querySelectorAll('.cl-tag-label').forEach(l => {
+        l.style.borderColor = 'var(--border)';
+        l.querySelector('input').checked = false;
+    });
+    addChangeRow(); // одна строка по умолчанию
+
+    overlay.style.display = 'flex';
+}
+
+function addChangeRow(value = '') {
+    const list = document.getElementById('cl-changes-list');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+    row.innerHTML = `
+        <input type="text" placeholder="Описание изменения..." value="${value}"
+            style="flex:1;background:var(--surface);border:1px solid var(--border);
+            border-radius:12px;padding:9px 14px;color:var(--text-main);
+            font-family:Inter,sans-serif;font-size:0.88rem;" required>
+        <button type="button" class="cl-remove-row" style="
+            background:none;border:none;color:var(--text-muted);
+            font-size:1.2rem;cursor:pointer;padding:4px;line-height:1;
+            transition:color 0.15s;flex-shrink:0;
+        " title="Удалить">×</button>
+    `;
+    row.querySelector('.cl-remove-row').addEventListener('click', () => {
+        if (document.querySelectorAll('#cl-changes-list > div').length > 1) {
+            row.remove();
+        } else {
+            showNotification('Нужен хотя бы один пункт', 'error');
+        }
+    });
+    list.appendChild(row);
+    row.querySelector('input').focus();
+}
+
+function initChangelogModalEvents(overlay) {
+    // Закрытие
+    const close = () => { overlay.style.display = 'none'; };
+    document.getElementById('changelog-modal-close').addEventListener('click', close);
+    document.getElementById('cl-cancel').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    // Клик вне модалки не закрывает через stopPropagation
+    document.getElementById('changelog-modal-box').addEventListener('click', e => e.stopPropagation());
+
+    // Теги — подсветка при выборе
+    document.querySelectorAll('.cl-tag-label').forEach(label => {
+        label.addEventListener('click', () => {
+            const cb = label.querySelector('input');
+            cb.checked = !cb.checked;
+            const tagId = label.dataset.tag;
+            const tag = AVAILABLE_TAGS.find(t => t.id === tagId);
+            label.style.borderColor = cb.checked ? tag.color : 'var(--border)';
+            label.style.background  = cb.checked ? `${tag.color}15` : 'var(--surface)';
+        });
+    });
+
+    // Добавить строку
+    document.getElementById('cl-add-change').addEventListener('click', () => addChangeRow());
+
+    // Enter в строке → новая строка
+    document.getElementById('cl-changes-list').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            addChangeRow();
+        }
+    });
+
+    // Отправка формы
+    document.getElementById('changelog-form').addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const version = document.getElementById('cl-version').value.trim();
+        const dateVal = document.getElementById('cl-date').value;
+        const title   = document.getElementById('cl-title').value.trim();
+
+        const selectedTags = [...document.querySelectorAll('input[name="cl-tag"]:checked')]
+            .map(cb => cb.value);
+
+        const changes = [...document.querySelectorAll('#cl-changes-list input')]
+            .map(i => i.value.trim())
+            .filter(Boolean);
+
+        if (!changes.length) {
+            showNotification('Добавь хотя бы одно изменение', 'error');
+            return;
+        }
+
+        const submitBtn = document.getElementById('cl-submit');
+        submitBtn.textContent = 'Публикация...';
+        submitBtn.disabled = true;
+
+        try {
+            await addDoc(collection(db, 'changelog'), {
+                version,
+                date:      dateVal,
+                title,
+                tags:      selectedTags,
+                changes,
+                createdAt: serverTimestamp(),
+                createdBy: currentUser.uid,
+            });
+
+            showNotification(`Версия ${version} опубликована!`, 'success');
+            overlay.style.display = 'none';
+        } catch (err) {
+            showNotification('Ошибка: ' + err.message, 'error');
+        } finally {
+            submitBtn.textContent = 'Опубликовать';
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// =====================================================================
+// КОНЕЦ CHANGELOG
+// =====================================================================
 
 if (adminSearch) {
     adminSearch.addEventListener('input', (e) => {

@@ -56,110 +56,7 @@
             50% { opacity: 0.4; transform: scale(0.7); }
         }
 
-        /* ─── Секция превью приложения ─── */
-        .preview-section {
-            margin-bottom: 80px;
-        }
-        .preview-section h2 {
-            font-size: 1.4rem;
-            font-weight: 400;
-            color: var(--text-main);
-            margin-bottom: 8px;
-            letter-spacing: -0.3px;
-        }
-        .preview-section .section-sub {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            margin-bottom: 32px;
-        }
-        .preview-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        @media (max-width: 640px) {
-            .preview-grid { grid-template-columns: 1fr; }
-        }
-
-        /* Ячейка-заглушка */
-        .preview-slot {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            aspect-ratio: 16/9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: border-color 0.25s, transform 0.25s;
-            cursor: default;
-        }
-        .preview-slot:hover {
-            border-color: var(--border-accent);
-            transform: translateY(-3px);
-            box-shadow: 0 16px 48px rgba(0,0,0,0.35);
-        }
-        /* Реальное изображение */
-        .preview-slot img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 20px;
-        }
-        /* Видео-превью */
-        .preview-slot iframe {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 20px;
-        }
-        /* Заглушка (пока нет контента) */
-        .preview-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-muted);
-            pointer-events: none;
-            user-select: none;
-        }
-        .preview-placeholder-icon {
-            font-size: 2.2rem;
-            opacity: 0.4;
-        }
-        .preview-placeholder-label {
-            font-size: 0.78rem;
-            letter-spacing: 0.5px;
-            opacity: 0.5;
-        }
-        /* Бейдж типа контента */
-        .preview-badge {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(6px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 3px 10px;
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            z-index: 1;
-        }
-        /* Большая ячейка на всю ширину */
-        .preview-slot.wide {
-            grid-column: 1 / -1;
-            aspect-ratio: 21/9;
-        }
-        @media (max-width: 640px) {
-            .preview-slot.wide { aspect-ratio: 16/9; }
-        }
+        /* ─── Download card ─── */
         .download-card {
             background: linear-gradient(135deg, rgba(0,242,255,0.06), rgba(124,77,255,0.06));
             border: 1px solid var(--border-accent);
@@ -492,47 +389,6 @@
                 </div>
             </div>
 
-            <!-- ПРЕВЬЮ ПРИЛОЖЕНИЯ -->
-            <!-- 
-                КАК ЗАМЕНИТЬ ЗАГЛУШКИ:
-                
-                Скриншот (imgur или любая ссылка):
-                  Замени <div class="preview-placeholder">...</div>
-                  на <img src="https://i.imgur.com/XXXXX.png" alt="описание">
-                  
-                YouTube видео:
-                  Замени <div class="preview-placeholder">...</div>
-                  на <iframe src="https://www.youtube.com/embed/VIDEO_ID" allowfullscreen></iframe>
-                  
-                Убери/оставь .preview-badge по вкусу.
-            -->
-            <section class="preview-section">
-                <h2>Как это выглядит</h2>
-                <p class="section-sub">Демонстрация и скриншоты приложения</p>
-
-                <div class="preview-grid">
-
-                    <!-- Большое видео — главная демонстрация -->
-                    <div class="preview-slot wide" id="preview-main">
-                        <div class="preview-badge">📹 Демо</div>
-                        <iframe src="https://www.youtube.com/embed/7ppJvWxHrqM?rel=0&modestbranding=1" allowfullscreen></iframe>
-                    </div>
-
-                    <!-- Скриншот 1 -->
-                    <div class="preview-slot" id="preview-screen-1">
-                        <div class="preview-badge">🖥 Интерфейс</div>
-                        <img src="https://i.imgur.com/j6ZhWW7.png" alt="Главный экран Вайб" referrerpolicy="no-referrer">
-                    </div>
-
-                    <!-- Скриншот 2 -->
-                    <div class="preview-slot" id="preview-screen-2">
-                        <div class="preview-badge">🎙 Команды</div>
-                        <img src="https://i.imgur.com/qHPjZbk.png" alt="Голосовые команды" referrerpolicy="no-referrer">
-                    </div>
-
-                </div>
-            </section>
-
             <!-- FAQ -->
             <section class="faq-section">
                 <h2>Частые вопросы</h2>
@@ -595,112 +451,25 @@
                 </div>
             </section>
 
-            <!-- Changelog -->
+            <!-- Changelog — данные грузятся из Firestore -->
             <section class="changelog">
                 <h2>Changelog</h2>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <div class="ver">v0.1</div>
-                        <div class="date">26 фев 2026</div>
-                    </div>
-                    <div class="changelog-content">
-                        <h4>Big Update</h4>
-                        <div class="changelog-tags">
-                            <span class="tag fix">New</span>
-                            <!-- <span class="tag perf">Fix</span> -->
+                <div id="changelog-container">
+                    <!-- skeleton -->
+                    <div class="changelog-item" id="cl-skeleton">
+                        <div class="changelog-version">
+                            <div class="skeleton-line" style="width:48px;height:14px;border-radius:6px;margin-bottom:6px;"></div>
+                            <div class="skeleton-line" style="width:58px;height:11px;border-radius:6px;"></div>
                         </div>
-                        <ul class="changelog-list">
-                            <li>Добавлено улучшенное распознование</li>
-                            <li>Автокряк Spotify</li>
-                            <li>Доиграет за вас в CS2</li>
-                            <li>Подскажет советы в доте</li>
-                            <li>Поможет с музыкальным вкусом</li>
-                            <li>"Вайб, я кушаю" и он сам включает интересный ролик про секретные файлы Эпштейна!</li>
-                            <li>Интеграция с ИИ прямо в приложении для разговоров</li>
-                        </ul>
+                        <div class="changelog-content" style="flex:1;">
+                            <div class="skeleton-line" style="width:200px;height:16px;border-radius:6px;margin-bottom:12px;"></div>
+                            <div class="skeleton-line" style="width:80px;height:22px;border-radius:12px;margin-bottom:14px;display:inline-block;"></div>
+                            <div class="skeleton-line" style="height:12px;border-radius:6px;margin-bottom:8px;"></div>
+                            <div class="skeleton-line" style="width:75%;height:12px;border-radius:6px;margin-bottom:8px;"></div>
+                            <div class="skeleton-line" style="width:60%;height:12px;border-radius:6px;"></div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- <div class="changelog-item">
-                    <div class="changelog-version">
-                        <div class="ver">v0.3.1</div>
-                        <div class="date">26 янв 2026</div>
-                    </div>
-                    <div class="changelog-content">
-                        <h4>Бета — патч-обновление</h4>
-                        <div class="changelog-tags">
-                            <span class="tag fix">fix</span>
-                            <span class="tag perf">perf</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li>Исправлен краш при открытии YouTube без активного браузера</li>
-                            <li>Уменьшено использование RAM в режиме ожидания на ~30%</li>
-                            <li>Фикс: команда «Пауза» не срабатывала в Spotify на Windows 11</li>
-                            <li>Улучшена скорость распознавания голосовых команд</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <div class="ver">v0.3.0</div>
-                        <div class="date">10 янв 2026</div>
-                    </div>
-                    <div class="changelog-content">
-                        <h4>Сортировка файлов и медиа-контроль</h4>
-                        <div class="changelog-tags">
-                            <span class="tag new">new</span>
-                            <span class="tag improve">improve</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li>Добавлена автосортировка файлов по папкам (Docs, Py, Img, Media, Web)</li>
-                            <li>Новые команды управления медиаплеером: следующий трек, предыдущий, перемотка</li>
-                            <li>Поддержка нескольких мониторов</li>
-                            <li>Переработан интерфейс настроек</li>
-                            <li>Добавлены таймеры с уведомлениями</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <div class="ver">v0.2.0</div>
-                        <div class="date">15 дек 2025</div>
-                    </div>
-                    <div class="changelog-content">
-                        <h4>Браузер и YouTube</h4>
-                        <div class="changelog-tags">
-                            <span class="tag new">new</span>
-                            <span class="tag fix">fix</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li>Команды для браузера: открыть сайт, новая вкладка, закрыть</li>
-                            <li>Поиск на YouTube голосом — «Включи lo-fi»</li>
-                            <li>Регулировка громкости системы и приложений</li>
-                            <li>Исправлены множественные краши при старте</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <div class="ver">v0.1.0</div>
-                        <div class="date">1 ноя 2025</div>
-                    </div>
-                    <div class="changelog-content">
-                        <h4>Первый публичный релиз</h4>
-                        <div class="changelog-tags">
-                            <span class="tag new">new</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li>Базовое распознавание голосовых команд</li>
-                            <li>Открытие приложений по имени</li>
-                            <li>Блокнот с голосовым вводом</li>
-                            <li>Диспетчер задач через голос</li>
-                        </ul>
-                    </div>
-                </div> -->
             </section>
         </main>
 
