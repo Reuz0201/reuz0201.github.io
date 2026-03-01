@@ -284,9 +284,137 @@
             flex-shrink: 0;
         }
 
+        /* ─── Known Issues Block ─── */
+        .known-issues-block {
+            border-radius: 22px;
+            border: 1px solid rgba(255,193,7,0.25);
+            background: rgba(10,12,20,0.6);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            margin-bottom: 44px;
+        }
+
+        .ki-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 24px;
+            background: rgba(255,193,7,0.06);
+            border-bottom: 1px solid rgba(255,193,7,0.15);
+        }
+        .ki-header-icon { font-size: 1.3rem; flex-shrink: 0; }
+        .ki-header-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255,193,7,0.95);
+            margin-bottom: 2px;
+        }
+        .ki-header-sub {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+        .ki-toggle {
+            margin-left: auto;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+        .ki-toggle:hover { background: rgba(255,255,255,0.1); }
+
+        #ki-body { transition: max-height 0.4s cubic-bezier(0.2,0.9,0.3,1), opacity 0.3s; }
+        #ki-body.collapsed { max-height: 0; overflow: hidden; opacity: 0; }
+
+        .ki-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        .ki-item:last-child { border-bottom: none; }
+        .ki-item:hover { background: rgba(255,255,255,0.02); }
+
+        .ki-item-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .ki-error  .ki-item-icon { background: rgba(255,80,80,0.1);  color: #ff6b6b;  border: 1px solid rgba(255,80,80,0.2); }
+        .ki-warn   .ki-item-icon { background: rgba(255,193,7,0.1);  color: #fbbf24;  border: 1px solid rgba(255,193,7,0.2); }
+        .ki-info   .ki-item-icon { background: rgba(0,242,255,0.08); color: #00f2ff;  border: 1px solid rgba(0,242,255,0.2); }
+
+        .ki-item-body { flex: 1; min-width: 0; }
+        .ki-item-title {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .ki-item-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        .ki-badge {
+            font-size: 0.67rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            padding: 2px 9px;
+            border-radius: 20px;
+        }
+        .ki-badge-red    { background: rgba(255,80,80,0.15);  color: #ff6b6b; border: 1px solid rgba(255,80,80,0.3); }
+        .ki-badge-yellow { background: rgba(255,193,7,0.12);  color: #fbbf24; border: 1px solid rgba(255,193,7,0.3); }
+        .ki-badge-cyan   { background: rgba(0,242,255,0.1);   color: #00f2ff; border: 1px solid rgba(0,242,255,0.25); }
+
+        .ki-item-status {
+            flex-shrink: 0;
+            padding-top: 10px;
+        }
+        .ki-status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+        .ki-status-red    { background: #ff6b6b; box-shadow: 0 0 8px #ff6b6b; animation: pulse-dot 2s infinite; }
+        .ki-status-yellow { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse-dot 2.5s infinite; }
+        .ki-status-cyan   { background: #00f2ff; box-shadow: 0 0 8px #00f2ff; animation: pulse-dot 3s infinite; }
+
+        .ki-steps {
+            margin: 10px 0 0 0;
+            padding-left: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ki-steps li {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .ki-steps li strong { color: var(--accent-color); }
+
         @media (max-width: 600px) {
-            .changelog-item { grid-template-columns: 80px 1fr; gap: 0 12px; }
-            .changelog-version .ver { font-size: 0.78rem; }
+            .ki-header { flex-wrap: wrap; }
+            .ki-toggle { margin-left: 0; order: 3; }
+            .ki-item { flex-wrap: wrap; }
+            .ki-item-status { display: none; }
         }
     </style>
 </head>
@@ -328,21 +456,130 @@
             <div class="download-card">
                 <div class="download-card-info">
                     <h3><i class="fa-brands fa-windows"></i> Вайб для Windows</h3>
-                    <p>Установщик для Windows 10 / 11 (64-bit)</p>
+                    <p>Установщик для Windows 10 / 11 (64-bit) · Бета-версия</p>
                     <div class="download-card-meta">
-                        <span><strong>Версия:</strong> 0.1</span>
-                        <span><strong>Размер:</strong> ~48 МБ</span>
-                        <span><strong>Обновлено:</strong> 26 февраля 2026</span>
+                        <span><strong>Версия:</strong> 0.1-beta</span>
+                        <span><strong>Размер:</strong> ~120 МБ</span>
+                        <span><strong>Обновлено:</strong> март 2026</span>
                     </div>
                 </div>
-                <a href="#" class="btn-download" id="main-download-btn" onclick="handleDownload(event)">
-                    ↓ Скачать .exe
+                <a
+                    href="https://drive.google.com/file/d/1EAva5SxW338D5swQsdGOoHGR6r_CLqnF/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener"
+                    class="btn-download"
+                    id="main-download-btn"
+                    onclick="handleDownload(this)"
+                >
+                    <i class="fa-solid fa-download"></i> Скачать .exe
                 </a>
             </div>
 
-            <div class="download-note">
-                ⚠️ &nbsp;Windows Defender может предупредить о незнакомом приложении — это нормально для бета-версий. Нажмите «Подробнее» → «Выполнить в любом случае».
-            </div>
+            <!-- ═══ KNOWN ISSUES BANNER ═══ -->
+            <div class="known-issues-block" id="known-issues">
+
+                <!-- Заголовок блока -->
+                <div class="ki-header">
+                    <span class="ki-header-icon">⚠️</span>
+                    <div>
+                        <div class="ki-header-title">Важно перед запуском — известные ограничения бета</div>
+                        <div class="ki-header-sub">Прочтите, чтобы не удивляться. Всё будет исправлено.</div>
+                    </div>
+                    <button class="ki-toggle" id="ki-toggle-btn" onclick="toggleKnownIssues()">Скрыть</button>
+                </div>
+
+                <div id="ki-body">
+                    <!-- 1. Telegram -->
+                    <div class="ki-item ki-error">
+                        <div class="ki-item-icon">
+                            <i class="fa-brands fa-telegram"></i>
+                        </div>
+                        <div class="ki-item-body">
+                            <div class="ki-item-title">
+                                Telegram-интеграция временно не работает
+                                <span class="ki-badge ki-badge-red">Не работает</span>
+                            </div>
+                            <div class="ki-item-desc">
+                                Подключение к Telegram через настройки приложения в данный момент не функционирует.
+                                Вход может завершиться ошибкой или зависнуть. Функции «отправь сообщение» и «прочитай чат» недоступны.
+                                <br><strong>Не вводите номер телефона</strong> — до выхода следующего обновления.
+                            </div>
+                        </div>
+                        <div class="ki-item-status">
+                            <div class="ki-status-dot ki-status-red"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Вылет из аккаунтов -->
+                    <div class="ki-item ki-warn">
+                        <div class="ki-item-icon">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </div>
+                        <div class="ki-item-body">
+                            <div class="ki-item-title">
+                                Возможен случайный выход из аккаунта VIBE
+                                <span class="ki-badge ki-badge-yellow">Редко</span>
+                            </div>
+                            <div class="ki-item-desc">
+                                При обновлении приложения или после длительного бездействия сессия может сбрасываться.
+                                Если при запуске вы видите экран входа — это не взлом, просто войдите снова.
+                                Ваши данные в Firestore сохранены.
+                            </div>
+                        </div>
+                        <div class="ki-item-status">
+                            <div class="ki-status-dot ki-status-yellow"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Модель распознавания -->
+                    <div class="ki-item ki-info">
+                        <div class="ki-item-icon">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                        </div>
+                        <div class="ki-item-body">
+                            <div class="ki-item-title">
+                                Модель распознавания речи — скачать отдельно
+                                <span class="ki-badge ki-badge-cyan">Нужен шаг</span>
+                            </div>
+                            <div class="ki-item-desc">
+                                В дистрибутив <strong>не включена</strong> модель Vosk (~45 МБ) — это сделано специально,
+                                чтобы exe-файл оставался лёгким. После первого запуска:
+                                <ol class="ki-steps">
+                                    <li>Откройте <strong>Настройки → Модель распознавания речи</strong></li>
+                                    <li>Нажмите <strong>↓ Скачать</strong> рядом с нужной моделью (рекомендуем Small)</li>
+                                    <li>Дождитесь загрузки (прогресс виден прямо в интерфейсе)</li>
+                                    <li><strong>Перезапустите приложение</strong> — без этого голос не заработает</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="ki-item-status">
+                            <div class="ki-status-dot ki-status-cyan"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Defender -->
+                    <div class="ki-item ki-warn">
+                        <div class="ki-item-icon">
+                            <i class="fa-brands fa-windows"></i>
+                        </div>
+                        <div class="ki-item-body">
+                            <div class="ki-item-title">
+                                Windows Defender предупредит при запуске
+                                <span class="ki-badge ki-badge-yellow">Ожидаемо</span>
+                            </div>
+                            <div class="ki-item-desc">
+                                Приложение не подписано сертификатом (дорого для беты). Нажмите
+                                <strong>«Подробнее»</strong> → <strong>«Выполнить в любом случае»</strong>.
+                                Вайб не содержит вредоносного кода — подпись будет в релизе.
+                            </div>
+                        </div>
+                        <div class="ki-item-status">
+                            <div class="ki-status-dot ki-status-yellow"></div>
+                        </div>
+                    </div>
+                </div><!-- /ki-body -->
+
+            </div><!-- /known-issues -->
 
             <!-- Two-col: other versions + system requirements -->
             <div class="download-grid">
@@ -430,12 +667,38 @@
 
                 <div class="faq-item">
                     <button class="faq-question">
-                        Можно ли использовать бесплатно?
+                        Голосовой ввод не работает после установки — что делать?
                         <span class="faq-arrow">▼</span>
                     </button>
                     <div class="faq-answer">
-                        Да! Базовый функционал доступен бесплатно (тариф Free). Платные тарифы Basic и Pro
-                        с расширенными возможностями появятся позже. Следи за обновлениями.
+                        Модель распознавания речи не входит в дистрибутив. После первого запуска зайдите в
+                        <strong>Настройки → Модель распознавания речи</strong>, нажмите «↓ Скачать» рядом
+                        с <em>Small</em> (~45 МБ). Дождитесь 100% в прогресс-баре, затем <strong>перезапустите
+                        приложение</strong>. После перезапуска голос заработает.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Работает ли Telegram-интеграция?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        В текущей бета-версии Telegram-интеграция <strong>не работает</strong>.
+                        Не пытайтесь входить через настройки приложения — это может привести к ошибкам.
+                        Функция будет восстановлена в следующем обновлении. Следите за changelog ниже.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Меня выбросило из аккаунта VIBE — это нормально?
+                        <span class="faq-arrow">▼</span>
+                    </button>
+                    <div class="faq-answer">
+                        Да, это известная особенность беты. Сессия может сброситься после обновления или
+                        долгого простоя. Просто войдите снова — все ваши данные, настройки и история
+                        сохранены в облаке.
                     </div>
                 </div>
 
@@ -582,16 +845,56 @@
 
     <script type="module" src="script-download.js"></script>
     <script>
-        function handleDownload(e) {
-            e.preventDefault();
-            const btn = document.getElementById('main-download-btn');
-            btn.textContent = '⏳ Подготовка...';
+        // ── Кнопка скачивания ──
+        function handleDownload(btn) {
+            // Анимируем кнопку после клика, ссылка продолжает работать
             setTimeout(() => {
-                btn.textContent = '✓ Ссылка появится скоро';
-                btn.classList.add('disabled');
-            }, 1200);
-            // Когда будет реальный файл: window.location.href = 'https://...';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Открывается Drive…';
+                btn.style.background = '#34d399';
+                btn.style.boxShadow = '0 8px 30px rgba(52,211,153,0.4)';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-download"></i> Скачать .exe';
+                    btn.style.background = '';
+                    btn.style.boxShadow = '';
+                }, 3500);
+            }, 100);
         }
+
+        // ── Known Issues аккордеон ──
+        function toggleKnownIssues() {
+            const body = document.getElementById('ki-body');
+            const btn  = document.getElementById('ki-toggle-btn');
+            const collapsed = body.classList.toggle('collapsed');
+            btn.textContent = collapsed ? 'Показать' : 'Скрыть';
+        }
+
+        // ── Показ уведомления о Telegram при загрузке (один раз) ──
+        window.addEventListener('load', () => {
+            if (sessionStorage.getItem('tg-notice-shown')) return;
+            sessionStorage.setItem('tg-notice-shown', '1');
+            setTimeout(() => {
+                const c = document.getElementById('notification-container');
+                if (!c) return;
+                const n = document.createElement('div');
+                n.className = 'notification error';
+                n.style.cssText = 'max-width:320px;cursor:default;';
+                n.innerHTML = `
+                    <div style="font-size:0.85rem;font-weight:600;margin-bottom:4px;">
+                        <i class="fa-brands fa-telegram"></i> &nbsp;Telegram не работает
+                    </div>
+                    <div style="font-size:0.78rem;opacity:0.85;line-height:1.5;">
+                        Интеграция с Telegram временно отключена в этой версии. Не пытайтесь войти.
+                    </div>
+                `;
+                c.appendChild(n);
+                setTimeout(() => {
+                    n.classList.add('fade-out');
+                    setTimeout(() => n.remove(), 300);
+                }, 7000);
+            }, 1800);
+        });
+
+        // ── Password toggle ──
         document.addEventListener('click', function(e) {
             if (!e.target.classList.contains('toggle-password')) return;
             var input = e.target.previousElementSibling;
@@ -599,9 +902,8 @@
             input.type = input.type === 'password' ? 'text' : 'password';
             e.target.textContent = input.type === 'password' ? '👁' : '🙈';
         });
-    </script>
-    <script>
-        // FAQ аккордеон
+
+        // ── FAQ аккордеон ──
         document.querySelectorAll('.faq-question').forEach(btn => {
             btn.addEventListener('click', () => {
                 const item = btn.closest('.faq-item');
