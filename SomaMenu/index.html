@@ -1,1 +1,126 @@
-bebebe
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>Меню кухни — гид по составу</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;1,9..144,460&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="grain"></div>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-ticket">MENU · KITCHEN GUIDE</span>
+      <h1 class="brand-title">Состав меню</h1>
+      <p class="brand-sub">92 блюда · содержимое отдельно от соуса</p>
+    </div>
+    <nav class="view-switch" role="tablist" aria-label="Режим">
+      <button class="switch-btn is-active" data-view="browse" role="tab" aria-selected="true">Меню</button>
+      <button class="switch-btn" data-view="game" role="tab" aria-selected="false">Игра</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== BROWSE VIEW ===================== -->
+  <section id="browse-view" class="view">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M21 21L16.5 16.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input type="search" id="search-input" placeholder="Найти блюдо или ингредиент…" autocomplete="off">
+      </div>
+      <div class="category-chips" id="category-chips"></div>
+    </div>
+
+    <p class="empty-state hidden" id="browse-empty">Ничего не нашлось. Попробуйте другой запрос.</p>
+    <div class="dish-grid" id="dish-grid"></div>
+  </section>
+
+  <!-- ===================== GAME VIEW ===================== -->
+  <section id="game-view" class="view hidden">
+
+    <div class="game-topbar">
+      <div class="game-select-wrap">
+        <label for="game-category">Категория</label>
+        <select id="game-category"></select>
+      </div>
+      <div class="game-stats">
+        <div class="stat">
+          <span class="stat-num" id="stat-learned">0</span>
+          <span class="stat-label">выучено</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" id="stat-streak">0</span>
+          <span class="stat-label">серия</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" id="stat-remaining">0</span>
+          <span class="stat-label">осталось</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-stage">
+
+      <article class="game-card" id="game-card">
+        <div class="card-top">
+          <span class="ticket-no" id="game-ticket-no">№001</span>
+          <span class="cat-tag" id="game-cat-tag">КАТЕГОРИЯ</span>
+        </div>
+        <div class="ticket-perf"></div>
+
+        <h2 class="dish-name" id="game-dish-name">Название блюда</h2>
+
+        <div class="comp-group" id="group-content">
+          <div class="group-head">
+            <h3>Содержимое</h3>
+            <div class="dots" id="dots-content"></div>
+          </div>
+          <ul class="guess-list" id="list-content"></ul>
+        </div>
+
+        <div class="comp-group" id="group-sauce">
+          <div class="group-head">
+            <h3>Соус <span class="sub">(заправка)</span></h3>
+            <div class="dots" id="dots-sauce"></div>
+          </div>
+          <ul class="guess-list" id="list-sauce"></ul>
+        </div>
+
+        <form class="guess-form" id="guess-form" autocomplete="off">
+          <input type="text" id="guess-input" placeholder="Впишите ингредиент…" autocomplete="off" spellcheck="false">
+          <button type="submit" id="guess-submit">Проверить</button>
+        </form>
+
+        <p class="game-feedback" id="game-feedback" aria-live="polite">&nbsp;</p>
+
+        <div class="game-actions">
+          <button type="button" class="ghost-btn" id="btn-reveal">Показать состав</button>
+          <button type="button" class="ghost-btn" id="btn-skip">Другое блюдо</button>
+        </div>
+      </article>
+
+      <div class="game-complete hidden" id="game-complete">
+        <span class="complete-stamp">✓ ГОТОВО</span>
+        <h3 id="complete-dish-name">Блюдо выучено</h3>
+        <p>Весь состав распознан без подсказок.</p>
+        <button type="button" id="btn-next">Следующая карточка →</button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
