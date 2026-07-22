@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-<title>Меню кухни — гид по составу</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;1,9..144,460&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <title>Меню кухни и бара — гид по составу</title>
+  <link rel="icon" href="assets/logo.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,460;0,9..144,560;1,9..144,460&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -16,19 +17,33 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="brand">
-      <span class="brand-ticket">MENU · KITCHEN GUIDE</span>
+      <span class="brand-ticket">MENU · GUIDE</span>
       <h1 class="brand-title">Состав меню</h1>
-      <p class="brand-sub">92 блюда · содержимое отдельно от соуса</p>
+      <p class="brand-sub" id="brand-sub">Кухня · 92 блюда</p>
     </div>
-    <nav class="view-switch" role="tablist" aria-label="Режим">
-      <button class="switch-btn is-active" data-view="browse" role="tab" aria-selected="true">Меню</button>
-      <button class="switch-btn" data-view="game" role="tab" aria-selected="false">Игра</button>
-    </nav>
+    <div class="header-controls">
+      <!-- Паcхалка -->
+      <span class="design-credit">Designed by <a href="https://t.me/hikitosha" target="_blank" class="reuz-link">𝓡𝓮𝓾𝔃</a></span>
+
+      <!-- Переключатель типа меню -->
+      <div class="menu-type-switch" role="group" aria-label="Тип меню">
+        <button class="menu-type-btn is-active" data-type="kitchen">Кухня</button>
+        <button class="menu-type-btn" data-type="bar">Бар</button>
+        <button class="menu-type-btn" data-type="wine">Вино</button>
+      </div>
+
+      <!-- Кнопка открытия игры -->
+      <button class="game-trigger-btn" id="game-trigger-btn" aria-label="Открыть игру">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <span>Игра</span>
+      </button>
+    </div>
   </div>
 </header>
 
 <main>
-
   <!-- ===================== BROWSE VIEW ===================== -->
   <section id="browse-view" class="view">
     <div class="toolbar">
@@ -40,85 +55,98 @@
     </div>
 
     <p class="empty-state hidden" id="browse-empty">Ничего не нашлось. Попробуйте другой запрос.</p>
+
+    <!-- Основная сетка -->
     <div class="dish-grid" id="dish-grid"></div>
-  </section>
 
-  <!-- ===================== GAME VIEW ===================== -->
-  <section id="game-view" class="view hidden">
-
-    <div class="game-topbar">
-      <div class="game-select-wrap">
-        <label for="game-category">Категория</label>
-        <select id="game-category"></select>
-      </div>
-      <div class="game-stats">
-        <div class="stat">
-          <span class="stat-num" id="stat-learned">0</span>
-          <span class="stat-label">выучено</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num" id="stat-streak">0</span>
-          <span class="stat-label">серия</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-          <span class="stat-num" id="stat-remaining">0</span>
-          <span class="stat-label">осталось</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="game-stage">
-
-      <article class="game-card" id="game-card">
-        <div class="card-top">
-          <span class="ticket-no" id="game-ticket-no">№001</span>
-          <span class="cat-tag" id="game-cat-tag">КАТЕГОРИЯ</span>
-        </div>
-        <div class="ticket-perf"></div>
-
-        <h2 class="dish-name" id="game-dish-name">Название блюда</h2>
-
-        <div class="comp-group" id="group-content">
-          <div class="group-head">
-            <h3>Содержимое</h3>
-            <div class="dots" id="dots-content"></div>
-          </div>
-          <ul class="guess-list" id="list-content"></ul>
-        </div>
-
-        <div class="comp-group" id="group-sauce">
-          <div class="group-head">
-            <h3>Соус <span class="sub">(заправка)</span></h3>
-            <div class="dots" id="dots-sauce"></div>
-          </div>
-          <ul class="guess-list" id="list-sauce"></ul>
-        </div>
-
-        <form class="guess-form" id="guess-form" autocomplete="off">
-          <input type="text" id="guess-input" placeholder="Впишите ингредиент…" autocomplete="off" spellcheck="false">
-          <button type="submit" id="guess-submit">Проверить</button>
-        </form>
-
-        <p class="game-feedback" id="game-feedback" aria-live="polite">&nbsp;</p>
-
-        <div class="game-actions">
-          <button type="button" class="ghost-btn" id="btn-reveal">Показать состав</button>
-          <button type="button" class="ghost-btn" id="btn-skip">Другое блюдо</button>
-        </div>
-      </article>
-
-      <div class="game-complete hidden" id="game-complete">
-        <span class="complete-stamp">✓ ГОТОВО</span>
-        <h3 id="complete-dish-name">Блюдо выучено</h3>
-        <p>Весь состав распознан без подсказок.</p>
-        <button type="button" id="btn-next">Следующая карточка →</button>
-      </div>
-
+    <!-- Заглушка для вина (показывается когда выбран тип wine) -->
+    <div class="wine-placeholder hidden" id="wine-placeholder">
+      <div class="wine-icon">🍷</div>
+      <h2>Вино</h2>
+      <p class="wine-sub">Скоро здесь появится подробная карта вин</p>
+      <div class="wine-decoration"></div>
     </div>
   </section>
 
+  <!-- ===================== МОДАЛЬНОЕ ОКНО ИГРЫ ===================== -->
+  <div class="game-modal-overlay" id="game-modal-overlay">
+    <div class="game-modal">
+      <button class="game-modal-close" id="game-modal-close" aria-label="Закрыть игру">&times;</button>
+
+      <div class="game-topbar">
+        <div class="game-select-wrap">
+          <label for="game-category">Категория</label>
+          <select id="game-category"></select>
+        </div>
+        <div class="game-stats">
+          <div class="stat">
+            <span class="stat-num" id="stat-learned">0</span>
+            <span class="stat-label">выучено</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num" id="stat-streak">0</span>
+            <span class="stat-label">серия</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num" id="stat-remaining">0</span>
+            <span class="stat-label">осталось</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-stage">
+        <article class="game-card" id="game-card">
+          <div class="card-top">
+            <span class="ticket-no" id="game-ticket-no">№001</span>
+            <span class="cat-tag" id="game-cat-tag">КАТЕГОРИЯ</span>
+          </div>
+          <div class="ticket-perf"></div>
+
+          <div class="dish-header" id="dish-header">
+            <h2 class="dish-name" id="game-dish-name">Название блюда</h2>
+            <div class="dish-badge" id="dish-badge"></div>
+          </div>
+
+          <div class="comp-group" id="group-content">
+            <div class="group-head">
+              <h3>Содержимое</h3>
+              <div class="dots" id="dots-content"></div>
+            </div>
+            <ul class="guess-list" id="list-content"></ul>
+          </div>
+
+          <div class="comp-group" id="group-sauce">
+            <div class="group-head">
+              <h3>Соус <span class="sub">(заправка)</span></h3>
+              <div class="dots" id="dots-sauce"></div>
+            </div>
+            <ul class="guess-list" id="list-sauce"></ul>
+          </div>
+
+          <form class="guess-form" id="guess-form" autocomplete="off">
+            <input type="text" id="guess-input" placeholder="Впишите ингредиент…" autocomplete="off" spellcheck="false">
+            <button type="submit" id="guess-submit">Проверить</button>
+          </form>
+
+          <p class="game-feedback" id="game-feedback" aria-live="polite">&nbsp;</p>
+
+          <div class="game-actions">
+            <button type="button" class="ghost-btn" id="btn-reveal">Показать состав</button>
+            <button type="button" class="ghost-btn" id="btn-skip">Другое блюдо</button>
+          </div>
+        </article>
+
+        <div class="game-complete hidden" id="game-complete">
+          <span class="complete-stamp">✓ ГОТОВО</span>
+          <h3 id="complete-dish-name">Блюдо выучено</h3>
+          <p>Весь состав распознан без подсказок.</p>
+          <button type="button" id="btn-next">Следующая карточка →</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <script src="script.js"></script>

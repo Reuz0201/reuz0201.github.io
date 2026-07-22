@@ -1,0 +1,857 @@
+[
+  {
+    "category": "Архивные",
+    "name": "#2",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "мескаль", "full": "мескаль" },
+      { "label": "личи", "full": "личи" },
+      { "label": "фундук", "full": "фундук" }
+    ],
+    "sauce": [],
+    "number": "#2",
+    "icon": 4
+  },
+  {
+    "category": "Архивные",
+    "name": "#19",
+    "content": [
+      { "label": "ореховый джин", "full": "ореховый джин" },
+      { "label": "ликёр красный апельсин", "full": "ликёр красный апельсин" },
+      { "label": "содовая алоэ", "full": "содовая алоэ" }
+    ],
+    "sauce": [],
+    "number": "#19",
+    "icon": 8
+  },
+  {
+    "category": "Архивные",
+    "name": "#24",
+    "content": [
+      { "label": "ром", "full": "ром" },
+      { "label": "маракуйя", "full": "маракуйя" },
+      { "label": "кокос", "full": "кокос" },
+      { "label": "галангал", "full": "галангал" },
+      { "label": "агава", "full": "агава" }
+    ],
+    "sauce": [],
+    "number": "#24",
+    "icon": 1
+  },
+  {
+    "category": "Архивные",
+    "name": "#33",
+    "content": [
+      { "label": "ром", "full": "ром" },
+      { "label": "джин", "full": "джин" },
+      { "label": "текила", "full": "текила" },
+      { "label": "луми", "full": "луми" },
+      { "label": "гвоздика", "full": "гвоздика" },
+      { "label": "кардамон", "full": "кардамон" }
+    ],
+    "sauce": [],
+    "number": "#33",
+    "icon": 2
+  },
+  {
+    "category": "Архивные",
+    "name": "#48",
+    "content": [
+      { "label": "соджу", "full": "соджу" },
+      { "label": "персик", "full": "персик" },
+      { "label": "фундук", "full": "фундук" },
+      { "label": "йогурт", "full": "йогурт" },
+      { "label": "ройбуш", "full": "ройбуш" }
+    ],
+    "sauce": [],
+    "number": "#48",
+    "icon": 3
+  },
+  {
+    "category": "Архивные",
+    "name": "#56",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "слива", "full": "слива" },
+      { "label": "имбирь", "full": "имбирь" }
+    ],
+    "sauce": [],
+    "number": "#56",
+    "icon": 8
+  },
+  {
+    "category": "Архивные",
+    "name": "#58",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "игристое", "full": "игристое" },
+      { "label": "бобы тонка", "full": "бобы тонка" },
+      { "label": "вишня", "full": "вишня" },
+      { "label": "ромашка", "full": "ромашка" }
+    ],
+    "sauce": [],
+    "number": "#58",
+    "icon": 5
+  },
+  {
+    "category": "Коктейли",
+    "name": "#59",
+    "content": [
+      { "label": "водка", "full": "водка" },
+      { "label": "банан", "full": "банан" },
+      { "label": "каламанси", "full": "каламанси" },
+      { "label": "игристое", "full": "игристое" }
+    ],
+    "sauce": [],
+    "number": "#59",
+    "icon": 3
+  },
+  {
+    "category": "Коктейли",
+    "name": "#60",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "мята", "full": "мята" },
+      { "label": "грейпфрут", "full": "грейпфрут" },
+      { "label": "малина", "full": "малина" },
+      { "label": "игристое", "full": "игристое" }
+    ],
+    "sauce": [],
+    "number": "#60",
+    "icon": 3
+  },
+  {
+    "category": "Коктейли",
+    "name": "#61",
+    "content": [
+      { "label": "ром", "full": "ром" },
+      { "label": "халапеньо", "full": "халапеньо" },
+      { "label": "клубника", "full": "клубника" }
+    ],
+    "sauce": [],
+    "number": "#61",
+    "icon": 7
+  },
+  {
+    "category": "Коктейли",
+    "name": "#62",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "папайя", "full": "папайя" },
+      { "label": "бергамот", "full": "бергамот" },
+      { "label": "травяной ликер", "full": "травяной ликер" }
+    ],
+    "sauce": [],
+    "number": "#62",
+    "icon": 5
+  },
+  {
+    "category": "Коктейли",
+    "name": "#63",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "слива", "full": "слива" },
+      { "label": "гуава", "full": "гуава" },
+      { "label": "цветы чайного дерева", "full": "цветы чайного дерева" }
+    ],
+    "sauce": [],
+    "number": "#63",
+    "icon": 6
+  },
+  {
+    "category": "Коктейли",
+    "name": "#64",
+    "content": [
+      { "label": "текила", "full": "текила" },
+      { "label": "грейпфрут", "full": "грейпфрут" },
+      { "label": "эстрагон", "full": "эстрагон" },
+      { "label": "пандан", "full": "пандан" }
+    ],
+    "sauce": [],
+    "number": "#64",
+    "icon": 9
+  },
+  {
+    "category": "Коктейли",
+    "name": "#65",
+    "content": [
+      { "label": "джин", "full": "джин" },
+      { "label": "персик", "full": "персик" },
+      { "label": "вермут", "full": "вермут" }
+    ],
+    "sauce": [],
+    "number": "#65",
+    "icon": 7
+  },
+  {
+    "category": "Коктейли",
+    "name": "#66",
+    "content": [
+      { "label": "соджу", "full": "соджу" },
+      { "label": "шисо", "full": "шисо" },
+      { "label": "манго", "full": "манго" },
+      { "label": "игристое", "full": "игристое" }
+    ],
+    "sauce": [],
+    "number": "#66",
+    "icon": 7
+  },
+  {
+    "category": "Коктейли",
+    "name": "#67",
+    "content": [
+      { "label": "водка", "full": "водка" },
+      { "label": "персик", "full": "персик" },
+      { "label": "жасмин", "full": "жасмин" },
+      { "label": "горечь юдзу", "full": "горечь юдзу" }
+    ],
+    "sauce": [],
+    "number": "#67",
+    "icon": 9
+  },
+  {
+    "category": "Моктейли",
+    "name": "яблоко, личи, женьшень",
+    "content": [
+      { "label": "яблоко", "full": "яблоко" },
+      { "label": "личи", "full": "личи" },
+      { "label": "женьшень", "full": "женьшень" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "виноград, щавель",
+    "content": [
+      { "label": "виноград", "full": "виноград" },
+      { "label": "щавель", "full": "щавель" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "манго, эстрагон",
+    "content": [
+      { "label": "манго", "full": "манго" },
+      { "label": "эстрагон", "full": "эстрагон" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "нектарин, хризантема, содовая",
+    "content": [
+      { "label": "нектарин", "full": "нектарин" },
+      { "label": "хризантема", "full": "хризантема" },
+      { "label": "содовая", "full": "содовая" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "иван чай, мелисса, можжевельник, саган даля, чабрец",
+    "content": [
+      { "label": "иван чай", "full": "иван чай" },
+      { "label": "мелисса", "full": "мелисса" },
+      { "label": "можжевельник", "full": "можжевельник" },
+      { "label": "саган даля", "full": "саган даля" },
+      { "label": "чабрец", "full": "чабрец" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "шиповник, брусника, черная смородина",
+    "content": [
+      { "label": "шиповник", "full": "шиповник" },
+      { "label": "брусника", "full": "брусника" },
+      { "label": "черная смородина", "full": "черная смородина" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Моктейли",
+    "name": "ромашка с мятой",
+    "content": [
+      { "label": "ромашка", "full": "ромашка" },
+      { "label": "мята", "full": "мята" }
+    ],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "матча",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "гречишный",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "сливочный улун",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "эрл грей",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "чёрный",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "жасмин",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Чай",
+    "name": "зелёный",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "американо",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "доппио",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "капучино",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "латте",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "флэт уайт",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "какао",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "раф",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "раф трюфель арахис",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "матча латте",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кофе",
+    "name": "матча капучино",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "морковь",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "сельдерей",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "яблоко",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "грейпфрут",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "апельсин",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соки/Фреш",
+    "name": "ананас",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Вода",
+    "name": "edis",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Пиво и сидр",
+    "name": "Lucky buddah 330 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Пиво и сидр",
+    "name": "Tsingtao Zero Alcohol 330 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Пиво и сидр",
+    "name": "Сидр Poire de Bullevie 375 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Byrrh Grand Quinquina",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Martini Bianco",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Martini Fiero",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Amaro Abano Dry",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Amaro Montenegro",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Fernet Branca",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Ликёры и настойки",
+    "name": "Branca Menta",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Gintl",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Bee Gin London Dry",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Mare",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Hendricks",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Peddlers",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Monkey 47",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Джин",
+    "name": "Roku",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Noble Coyote Espadin 43%",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Tier 42%",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Espolon",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Don Julio 1942 Reposado",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Don Julio Reposado",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Don Julio blanco",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Текила и мескаль",
+    "name": "Clase Azul Reposado",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Писко",
+    "name": "Pisco Vinas de Oro Torontel",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Водка",
+    "name": "MAMONT",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Водка",
+    "name": "Beluga Noble",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Водка",
+    "name": "Beluga Gold Line",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Водка",
+    "name": "Beluga Transatlantic",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соджу",
+    "name": "Jinro Classic 375 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соджу",
+    "name": "Jinro Strawberry 360 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соджу",
+    "name": "Jinro Plum 360 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Соджу",
+    "name": "Jinro Peach 360 мл",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Baron G. Legrand Napoleon 10 ans Bas Armagnac",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Francois de Martignac VSOP",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Remy Martin XO",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Francois de Martignac VS",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Godet VS",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Коньяк / Арманьяк",
+    "name": "Godet VSOP",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кальвадос и граппа",
+    "name": "Christian Drouin VSOP",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Кальвадос и граппа",
+    "name": "Grappa di Chardonnay",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Grants",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Monkey Shoulder",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Jim Beam",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Kavalan Port Cask",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "The Galtee Mountain Boy",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Tullamore Dew",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Bellevoye Finition Calvados",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "The Kurayoshi",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Bruichladdich Port Charlotte 10 Y.O.",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Auchentoshan 12 Y.O.",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Laphroaig Quarter Cask",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Talisker 10 Y.O.",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Glenfiddich 12 Y.O.",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Виски",
+    "name": "Arran Barrel Reserve",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Порто и херес",
+    "name": "Martinez Fine Ruby",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Порто и херес",
+    "name": "Graham's Fine White",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Порто и херес",
+    "name": "Graham's Late Bottled Vintage",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Порто и херес",
+    "name": "Manzanilla Deliciosa",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Порто и херес",
+    "name": "Pedro Ximenez El Candado",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Саке",
+    "name": "Junmai Taruzake Yatagarasu",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Саке",
+    "name": "Nigori Yatagarasu",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Саке",
+    "name": "Assemblage Yatagarasu",
+    "content": [],
+    "sauce": []
+  },
+  {
+    "category": "Шприцы",
+    "name": "#79",
+    "content": [
+      { "label": "игристое", "full": "игристое" },
+      { "label": "джин", "full": "джин" },
+      { "label": "юдзу", "full": "юдзу" },
+      { "label": "бергамот", "full": "бергамот" },
+      { "label": "лемонграсс", "full": "лемонграсс" },
+      { "label": "содовая", "full": "содовая" }
+    ],
+    "sauce": [],
+    "number": "#79",
+    "icon": 5
+  },
+  {
+    "category": "Шприцы",
+    "name": "#80",
+    "content": [
+      { "label": "игристое", "full": "игристое" },
+      { "label": "ром", "full": "ром" },
+      { "label": "финик", "full": "финик" },
+      { "label": "ванильная содовая", "full": "ванильная содовая" }
+    ],
+    "sauce": [],
+    "number": "#80",
+    "icon": 5
+  },
+  {
+    "category": "Шприцы",
+    "name": "#81",
+    "content": [
+      { "label": "игристое", "full": "игристое" },
+      { "label": "ликер стрега", "full": "ликер стрега" },
+      { "label": "помело", "full": "помело" }
+    ],
+    "sauce": [],
+    "number": "#81",
+    "icon": 5
+  },
+  {
+    "category": "Шприцы",
+    "name": "#82",
+    "content": [
+      { "label": "игристое", "full": "игристое" },
+      { "label": "джин", "full": "джин" },
+      { "label": "гуава", "full": "гуава" },
+      { "label": "каму-каму", "full": "каму-каму" },
+      { "label": "содовая", "full": "содовая" }
+    ],
+    "sauce": [],
+    "number": "#82",
+    "icon": 5
+  }
+]
