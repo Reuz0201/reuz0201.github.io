@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jeffrey Mogger</title>
+<meta name="description" content="Jeffrey Mogger: Discord-бот с музыкой и фильтрами, модерацией, уровнями, экономикой, казино, питомцами и угадай мелодию.">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="logo" href="#top"><img class="logo-mark" src="assets/avatar.jpg" alt="" width="34" height="34"><span class="bot-name">Nova</span></a>
+    <nav class="nav-links" aria-label="Разделы">
+      <a href="#features">Возможности</a>
+      <a href="#commands">Команды</a>
+      <a href="#play">Мини-игры</a>
+      <a href="#premium">Premium</a>
+    </nav>
+    <a class="btn btn-coin invite-link" href="#" target="_blank" rel="noopener">Добавить на сервер</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">Discord-бот · музыка · модерация · экономика</span>
+        <h1>Один бот вместо пяти: <em>музыка</em>, порядок и целая экономика</h1>
+        <p class="lead">Играет треки с YouTube, Spotify и SoundCloud с фильтрами вроде slowed и bassboost, держит чат в порядке, а участники копят монеты, растят питомцев и соревнуются за уровни.</p>
+        <div class="hero-cta">
+          <a class="btn btn-coin invite-link" href="#" target="_blank" rel="noopener">Добавить на сервер</a>
+          <a class="btn btn-ghost" href="#commands">Все команды</a>
+        </div>
+        <p class="prefix-note">Каждая команда работает и через <code>/</code>, и через префикс <code>!</code>. Префикс меняется на любой.</p>
+      </div>
+
+      <div class="hero-stage">
+      <div class="hero-avatar" aria-hidden="true"><img src="assets/avatar.jpg" alt="" width="400" height="400"></div>
+      <div class="discord-window" aria-label="Пример панели плеера">
+        <div class="channel-bar"><span>#</span><b>музыка</b></div>
+        <div class="msg">
+          <img class="avatar" src="assets/avatar.jpg" alt="" width="42" height="42">
+          <div class="msg-body">
+            <div class="cmd-line">gigachad_228 использовал(а) <code>/play никогда тебя не брошу</code></div>
+            <div class="msg-head"><b class="bot-name">Nova</b><span class="tag-bot">БОТ</span><span class="msg-time">сегодня в 21:04</span></div>
+            <div class="embed">
+              <div class="embed-top">
+                <div>
+                  <div class="embed-label"><span id="state-label">▶ Сейчас играет</span> <span class="eq" id="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+                  <div class="track">Never Gonna Give You Up</div>
+                  <div class="artist">Rick Astley</div>
+                </div>
+                <div class="cover" aria-hidden="true"></div>
+              </div>
+              <div class="progress"><span id="t-cur">0:00</span><div class="bar"><i id="t-bar"></i></div><span id="t-len">3:33</span></div>
+              <div class="embed-meta">
+                <span>Громкость <b id="vol">80%</b></span>
+                <span>Повтор <b id="loop">выкл</b></span>
+                <span>Фильтр <b id="flt">нет</b></span>
+                <span>В очереди <b>4 трека</b></span>
+              </div>
+              <div class="buttons">
+                <button class="dbtn" id="b-pause" type="button">⏸ Пауза</button>
+                <button class="dbtn" id="b-skip" type="button">⏭</button>
+                <button class="dbtn" id="b-loop" type="button">🔁</button>
+                <button class="dbtn" id="b-vdown" type="button">🔉</button>
+                <button class="dbtn" id="b-vup" type="button">🔊</button>
+                <button class="dbtn" id="b-lyrics" type="button">📜 Текст</button>
+              </div>
+            </div>
+            <div style="margin-top:12px;display:grid;gap:8px">
+              <div class="chips" id="filters" aria-label="Фильтры"></div>
+              <span class="hint">Нажми на фильтр: так он включается командой <code id="flt-cmd">/slowed</code>. <span class="star" style="color:var(--coin)">★</span> только с Premium.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
+
+  <div class="stats">
+    <div class="wrap">
+      <div class="stat"><b data-count="97">97</b><span>слэш-команд</span></div>
+      <div class="stat"><b data-count="7">7</b><span>аудиофильтров</span></div>
+      <div class="stat"><b data-count="23">23</b><span>достижения</span></div>
+      <div class="stat"><b data-count="11">11</b><span>фонов для карточек</span></div>
+      <div class="stat"><b data-count="7">7</b><span>видов питомцев</span></div>
+    </div>
+  </div>
+
+  <section class="block" id="features">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># возможности</span>
+        <h2>Всё, чем живёт сервер</h2>
+        <p>Бот закрывает музыку и модерацию, а сверху добавляет то, ради чего люди возвращаются в чат каждый день.</p>
+      </div>
+      <div class="features">
+        <article class="reveal feature wide">
+          <span class="ico">🎧</span>
+          <h3>Музыка с живой панелью</h3>
+          <p>YouTube, Spotify и SoundCloud, очередь до 1000 треков, повтор трека или очереди. После <code>/play</code> появляется панель с прогресс-баром и кнопками, а <code>/seek 1:30</code> перематывает куда нужно.</p>
+          <ul>
+            <li>Фильтры: slowed, bassboost, reverb, nightcore, 8D, vaporwave, slowed + reverb</li>
+            <li>Текст песни одной кнопкой, автоплей похожих треков, режим 24/7</li>
+            <li>Личные плейлисты: до 25 штук по 500 треков</li>
+          </ul>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">🛡️</span>
+          <h3>Модерация</h3>
+          <p>Кик, бан, мут, варны с авто-наказанием, чистка чата до 1000 сообщений, slowmode и блокировка канала. Автомод фильтрует запрещённые слова и спам, лог пишет всё в отдельный канал.</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">📈</span>
+          <h3>Уровни и роли</h3>
+          <p>XP за сообщения и за время в голосовом. Карточка ранга картинкой, таблица лидеров, роли-награды за уровень.</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">🪙</span>
+          <h3>Экономика</h3>
+          <p>Монеты за активность, <code>/daily</code> с серией, работа, кражи, банк, переводы и магазин ролей от админов.</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">🎰</span>
+          <h3>Игры и казино</h3>
+          <p>Слоты до x50, блэкджек с кнопками, монетка, дуэли, рулетка, crash и «Сапёр» на монеты.</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">🎵</span>
+          <h3>Угадай мелодию</h3>
+          <p>Бот включает 30 секунд песни в войсе, все пишут ответ в чат. Пять категорий: русский рэп, поп, зарубежные хиты, нулевые и мемы.</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">📜</span>
+          <h3>Задания и ачивки</h3>
+          <p>Каждый день в полночь по МСК три новых задания, за все три бонус 500 монет. 23 достижения вроде «Миллионер» и «Джекпот».</p>
+        </article>
+        <article class="reveal feature">
+          <span class="ico">💍</span>
+          <h3>Развлечения</h3>
+          <p>Свадьбы и разводы, шиппинг, магический шар, кубики и гифки-действия: обнять, погладить, дать пять.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="cards">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># карточки</span>
+        <h2>Профиль, который хочется показать</h2>
+        <p><code>/rank</code> и <code>/profile</code> рисуют картинку с аватаркой, полоской опыта и статистикой. 11 фонов покупаются за монеты.</p>
+      </div>
+      <div class="cards-grid">
+        <div class="pcard" id="pcard" role="img" aria-label="Пример карточки профиля Jeffrey Mogger">
+          <div class="pcard-in">
+            <div class="pcard-top">
+              <img class="pcard-ava" src="assets/avatar.jpg" alt="" width="120" height="120">
+              <div class="pcard-who">
+                <div class="pcard-row"><b class="bot-name">Nova</b><span class="pcard-lvl">Ур. 99</span></div>
+                <span class="pcard-sub">На сервере с 01.01.2025</span>
+                <span class="pcard-xp-t">8 840 / 10 000 XP</span>
+                <div class="pcard-xp"><i></i></div>
+              </div>
+            </div>
+            <div class="pcard-stats">
+              <div><span>Монеты</span><b>1 000 000</b></div>
+              <div><span>Место по деньгам</span><b>#1</b></div>
+              <div><span>Сообщений</span><b>69 420</b></div>
+              <div><span>Серия ежедневок</span><b>365 дн.</b></div>
+              <div><span>В браке с</span><b>Качалка</b></div>
+              <div><span>Питомец</span><b>🐉 Мьюинг</b></div>
+              <div><span>Достижения</span><b>23/23</b></div>
+              <div><span>Побед в мелодии</span><b>777</b></div>
+            </div>
+            <div class="pcard-foot">Последние достижения: Миллионер · Джекпот · Неделя подряд</div>
+          </div>
+        </div>
+        <div class="cards-side">
+          <div class="bg-list" id="bg-list" role="radiogroup" aria-label="Фоны карточек"></div>
+          <div class="mini-rank" id="mini-rank">
+            <img class="ava" src="assets/avatar.jpg" alt="" width="56" height="56">
+            <div>
+              <b>gigachad_228</b>
+              <div class="mini-meta"><span>Ранг #2</span><span>640 / 1 000 XP</span></div>
+              <div class="xp"><i></i></div>
+            </div>
+            <div class="lvl">Ур. 12</div>
+          </div>
+          <p class="hint">Нажми на фон: так выглядят <code>/profile</code> и <code>/rank</code> после <code>/background set</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="commands">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># команды</span>
+        <h2>Слэш или префикс, как удобнее</h2>
+        <p>Переключи режим справа: так команды выглядят в чате. ★ значит, что команда работает на сервере с Premium.</p>
+      </div>
+      <div class="terminal reveal">
+        <div class="term-top">
+          <div class="tabs" id="tabs" role="tablist"></div>
+          <div class="toggle" role="group" aria-label="Способ вызова">
+            <button type="button" class="on" data-p="/">/</button>
+            <button type="button" data-p="!">!</button>
+          </div>
+        </div>
+        <ul class="cmd-list" id="cmd-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="play">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># казино</span>
+        <h2>Попробуй прямо здесь</h2>
+        <p>Те же слоты и те же множители, что у <code>/slots</code> в боте. Монеты ненастоящие, начни с тысячи.</p>
+      </div>
+      <div class="play-grid">
+        <div class="slots reveal">
+          <div class="coin-rain" id="coin-rain" aria-hidden="true"></div>
+          <div class="reels">
+            <div class="reel" id="r0">🍒</div><div class="reel" id="r1">🔔</div><div class="reel" id="r2">💎</div>
+          </div>
+          <div class="slot-row">
+            <span class="wallet">🪙 <b id="wallet">1 000</b></span>
+            <span class="bet">Ставка
+              <button type="button" id="bet-down" aria-label="Уменьшить ставку">−</button>
+              <b id="bet" class="mono">100</b>
+              <button type="button" id="bet-up" aria-label="Увеличить ставку">+</button>
+            </span>
+            <button class="btn btn-coin" id="spin" type="button">Крутить</button>
+          </div>
+          <div class="result" id="result" aria-live="polite">Три одинаковых дают множитель, два одинаковых дают x1.5.</div>
+          <div class="paytable" id="paytable"></div>
+        </div>
+        <div class="pets reveal">
+          <h3>🐾 Питомцы приносят монеты</h3>
+          <p class="hint">Купи питомца, корми и играй с ним, а он раз в час приносит монеты. Сытый и довольный приносит больше.</p>
+          <ul class="pet-list" id="pet-list"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="premium">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># premium</span>
+        <h2>Бесплатно для всех, больше с Premium</h2>
+        <p>Подписка покупается на сервер. Админ вводит ключ, и Premium получают все участники.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col"></th><th scope="col">Free</th><th scope="col" class="prem">★ Premium</th></tr></thead>
+          <tbody>
+            <tr><td>Очередь</td><td>15 треков</td><td>1000 треков</td></tr>
+            <tr><td>Плейлисты и альбомы по ссылке</td><td>только первый трек</td><td>до 300 треков</td></tr>
+            <tr><td>Фильтры</td><td>slowed и bassboost, по одному</td><td>все 7 и slowed + reverb, комбинации, бас 1–20 dB</td></tr>
+            <tr><td>Личные плейлисты, автоплей, 24/7</td><td class="no">нет</td><td class="yes">есть</td></tr>
+            <tr><td>Варны</td><td>до 3 на человека</td><td>без лимита + авто-мут и бан</td></tr>
+            <tr><td><code>/clear</code></td><td>до 50 сообщений</td><td>до 1000, по пользователю</td></tr>
+            <tr><td>Автомод, лог модерации, tempban</td><td class="no">нет</td><td class="yes">есть</td></tr>
+            <tr><td>Уровни, экономика, игры, питомцы</td><td class="yes">есть</td><td class="yes">есть</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="plans">
+        <div class="plan"><div><b>Месяц</b><br><span>30 дней Premium для сервера</span></div><span class="key">/premium activate</span></div>
+        <div class="plan"><div><b>Год</b><br><span>365 дней, новый ключ продлевает срок</span></div><span class="key">PRM-XXXX-XXXX-XXXX</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="start">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="channel"># как начать</span>
+        <h2>Три шага до первой песни</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><h3>Пригласи бота</h3><p>Кнопка «Добавить на сервер» откроет окно Discord. Выбери сервер и подтверди права.</p></li>
+        <li class="reveal"><h3>Подними его роль</h3><p>Роль бота должна стоять выше ролей, которые он будет мутить и кикать.</p></li>
+        <li class="reveal"><h3>Зайди в войс</h3><p>Напиши <code>/play</code> или <code>!p</code> и название трека. Справка по всем командам: <code>/help</code>.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <h2>Добавь <span class="bot-name">Nova</span> на свой сервер</h2>
+      <a class="btn invite-link" href="#" target="_blank" rel="noopener">Добавить бесплатно</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 <span class="bot-name">Nova</span>. Не связан с Discord Inc.</span>
+    <span>Забыл префикс? Просто упомяни бота.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
