@@ -1,0 +1,589 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Undertone</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Undertone — музыкальный плеер для Windows: Яндекс Музыка, SoundCloud и Spotify в одном окне.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one column of bands; hero = text left, live player right; the accent follows the "cover" like in the app */
+@property --live { syntax: '<color>'; inherits: true; initial-value: #8b7bff; }
+:root {
+  color-scheme: dark;
+  --bg: #0c0c11;
+  --panel: #15151d;
+  --panel-2: #1c1c26;
+  --line: #2a2a36;
+  --fg: #ecebf3;
+  --dim: #a3a1b4;
+  --faint: #6f6d82;
+  --ink: #0c0c11;
+  --live: #8b7bff;
+  --font-display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Onest", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --release: "https://github.com/Reuz0201/Undertone-app/releases/latest";
+  transition: --live 1.6s ease;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+.wrap {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+.eyebrow {
+  font: 600 12px/1 var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--live);
+}
+:focus-visible { outline: 2px solid var(--live); outline-offset: 3px; border-radius: 6px; }
+
+/* ── шапка ── */
+header.top { padding-block: 22px; }
+.top .wrap { display: flex; align-items: center; gap: 28px; }
+.mark { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 800 18px/1 var(--font-display); letter-spacing: 0.02em; }
+.mark i {
+  width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+  background: var(--live); color: var(--ink); font-style: normal; font-size: 13px;
+}
+nav.links { display: flex; gap: 22px; margin-left: auto; font-size: 14.5px; color: var(--dim); }
+nav.links a { text-decoration: none; }
+nav.links a:hover { color: var(--fg); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 22px; border-radius: 999px; border: 0;
+  font: 600 15.5px/1 var(--font-body); text-decoration: none; cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, background .3s ease;
+}
+.btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn.primary { background: var(--live); color: var(--ink); }
+.btn.ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.small { padding: 10px 16px; font-size: 14px; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+
+/* ── герой ── */
+.hero { padding-block: 40px 70px; position: relative; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+.hero h1 { font-size: clamp(38px, 5.6vw, 68px); line-height: 1.02; margin-top: 18px; }
+.hero h1 em { font-style: normal; color: var(--live); }
+.hero .lead { margin-top: 22px; font-size: 18.5px; color: var(--dim); max-width: 34em; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.meta { margin-top: 18px; font: 400 13px/1.5 var(--font-mono); color: var(--faint); }
+.glow {
+  position: absolute; inset: -120px 0 auto; height: 560px; pointer-events: none; z-index: -1;
+  background: radial-gradient(600px 340px at 72% 40%, color-mix(in srgb, var(--live) 26%, transparent), transparent 70%);
+}
+
+/* плеер-макет */
+.player {
+  background: var(--panel); border-radius: 26px; padding: 22px;
+  box-shadow: 0 40px 80px -30px color-mix(in srgb, var(--live) 35%, #000), inset 0 0 0 1px var(--line);
+  min-width: 0;
+}
+.now { display: grid; grid-template-columns: 132px 1fr; gap: 20px; align-items: center; }
+.cover {
+  aspect-ratio: 1; border-radius: 16px; max-width: 100%;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--live) 90%, #fff) 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 75%, color-mix(in srgb, var(--live) 55%, #000) 0 30%, transparent 31%),
+    linear-gradient(140deg, color-mix(in srgb, var(--live) 70%, #000), color-mix(in srgb, var(--live) 25%, #000));
+}
+.now .kicker { font: 600 11px/1 var(--font-mono); letter-spacing: .12em; color: var(--faint); text-transform: uppercase; }
+.now h3 { font-size: 22px; margin-top: 8px; line-height: 1.15; }
+.now .artist { color: var(--dim); margin-top: 4px; font-size: 15px; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tag { font: 500 12px/1 var(--font-body); padding: 6px 10px; border-radius: 999px; background: var(--panel-2); color: var(--dim); }
+.tag.on { background: color-mix(in srgb, var(--live) 22%, var(--panel-2)); color: var(--fg); }
+canvas.spectrum { display: block; width: 100%; height: 110px; margin-top: 20px; }
+.progress { display: flex; align-items: center; gap: 12px; margin-top: 10px; font: 400 12px/1 var(--font-mono); color: var(--faint); font-variant-numeric: tabular-nums; }
+.bar { flex: 1; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.bar span { display: block; height: 100%; width: 38%; background: var(--live); border-radius: 4px; }
+.controls { display: flex; justify-content: center; align-items: center; gap: 22px; margin-top: 16px; color: var(--dim); }
+.controls .play { width: 48px; height: 48px; border-radius: 50%; background: var(--fg); color: var(--ink); display: grid; place-items: center; }
+.controls svg { width: 20px; height: 20px; }
+.hint { margin-top: 14px; font-size: 12.5px; color: var(--faint); text-align: center; }
+
+/* ── сервисы ── */
+section { padding-block: 70px; }
+.head { display: grid; gap: 14px; margin-bottom: 36px; max-width: 760px; }
+.head h2 { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.1; }
+.head p { color: var(--dim); font-size: 17px; }
+.services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.svc { padding: 26px; border-radius: 22px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: 14px; align-content: start; min-width: 0; }
+.svc .logo { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font: 800 16px/1 var(--font-display); }
+.svc h3 { font-size: 20px; }
+.svc ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--dim); font-size: 15px; }
+.svc li { display: flex; gap: 10px; }
+.svc li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; margin-top: .62em; flex: none; }
+.svc .note { font: 400 12.5px/1.5 var(--font-mono); color: var(--faint); border-top: 1px solid var(--line); padding-top: 12px; }
+
+/* ── эффекты (интерактив) ── */
+.fx { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; }
+.fx-panel { background: var(--panel); border-radius: 24px; padding: 24px; box-shadow: inset 0 0 0 1px var(--line); min-width: 0; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+  font: 500 14px/1 var(--font-body); padding: 10px 14px; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--dim); border: 1px solid var(--line);
+  transition: background .2s, color .2s, border-color .2s;
+}
+.pill:hover { color: var(--fg); }
+.pill[aria-pressed="true"] { background: var(--live); border-color: var(--live); color: var(--ink); font-weight: 600; }
+.readout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+.readout div { background: var(--panel-2); border-radius: 14px; padding: 14px; }
+.readout b { display: block; font: 700 22px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.readout span { font-size: 12.5px; color: var(--faint); }
+canvas.wave { display: block; width: 100%; height: 150px; margin-top: 18px; border-radius: 14px; background: var(--panel-2); }
+.fx-desc { color: var(--dim); font-size: 17px; display: grid; gap: 16px; }
+.fx-desc strong { color: var(--fg); font-weight: 600; }
+
+/* ── возможности ── */
+.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; }
+.card { background: var(--panel); border-radius: 22px; padding: 24px; box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card h3 { font-size: 18px; }
+.card p { color: var(--dim); font-size: 15px; }
+.span-3 { grid-column: span 3; }
+.span-2 { grid-column: span 2; }
+
+.recap {
+  border-radius: 18px; padding: 20px; margin-top: 6px; color: #fff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--live) 70%, #000), color-mix(in srgb, var(--live) 30%, #120f1f));
+  display: grid; gap: 4px;
+}
+.recap small { font: 600 11px/1 var(--font-mono); letter-spacing: .12em; opacity: .75; }
+.recap .big { font: 800 44px/1 var(--font-display); font-variant-numeric: tabular-nums; margin-top: 8px; }
+.recap .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.recap .row span { background: rgba(255,255,255,.16); border-radius: 999px; padding: 5px 10px; font-size: 12.5px; }
+
+.eq { display: flex; align-items: end; gap: 7px; height: 90px; margin-top: 6px; }
+.eq span { flex: 1; border-radius: 6px 6px 3px 3px; background: color-mix(in srgb, var(--live) 75%, var(--panel-2)); }
+.eq-labels { display: flex; gap: 7px; font: 400 10.5px/1 var(--font-mono); color: var(--faint); }
+.eq-labels span { flex: 1; text-align: center; }
+
+.qr { width: 88px; height: 88px; border-radius: 12px; background: var(--fg); padding: 8px; display: grid; grid-template-columns: repeat(9, 1fr); gap: 2px; }
+.qr i { background: var(--ink); border-radius: 1px; }
+.qr i.o { background: transparent; }
+.split { display: flex; gap: 18px; align-items: center; }
+
+/* ── горячие клавиши ── */
+.keys { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 40px; }
+.key { display: flex; align-items: center; gap: 14px; padding-block: 12px; border-bottom: 1px solid var(--line); min-width: 0; }
+.key .k { display: flex; gap: 6px; flex: none; min-width: 112px; }
+kbd {
+  font: 600 13px/1 var(--font-mono); padding: 7px 9px; min-width: 30px; text-align: center;
+  border-radius: 8px; background: var(--panel-2); box-shadow: inset 0 -2px 0 var(--line), inset 0 0 0 1px var(--line);
+}
+.key span { color: var(--dim); font-size: 15px; }
+
+/* ── финал ── */
+.final { text-align: center; padding-block: 90px 60px; }
+.final h2 { font-size: clamp(30px, 4.4vw, 54px); line-height: 1.05; }
+.final p { color: var(--dim); margin-top: 16px; font-size: 17px; }
+.final .cta { justify-content: center; }
+footer { padding-block: 28px 40px; color: var(--faint); font-size: 13.5px; border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; }
+
+@media (max-width: 900px) {
+  .hero .wrap, .fx { grid-template-columns: 1fr; gap: 40px; }
+  .services { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: 1fr 1fr; }
+  .span-3, .span-2 { grid-column: span 2; }
+  .keys { grid-template-columns: 1fr; }
+  nav.links { display: none; }
+  .top .btn { margin-left: auto; }
+}
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; }
+  .span-3, .span-2 { grid-column: span 1; }
+  .now { grid-template-columns: 96px 1fr; gap: 14px; }
+  .readout b { font-size: 18px; }
+  section { padding-block: 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { transition: none; }
+  .btn { transition: none; }
+}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top" aria-label="Undertone"><i>U</i>Undertone</a>
+    <nav class="links" aria-label="Разделы">
+      <a href="#services">Сервисы</a>
+      <a href="#effects">Эффекты</a>
+      <a href="#features">Возможности</a>
+      <a href="#keys">Клавиши</a>
+    </nav>
+    <a class="btn primary small js-download" href="https://github.com/Reuz0201/Undertone-app/releases/latest" target="_blank" rel="noopener">Скачать</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="glow" aria-hidden="true"></div>
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Плеер для Windows</span>
+        <h1 id="hero-title">Яндекс Музыка, SoundCloud и Spotify <em>в одном окне</em></h1>
+        <p class="lead">Undertone — быстрый плеер с Моей волной, эффектами slowed + reverb, итогами как в Wrapped и комнатами, где друзья слушают одно и то же секунда в секунду.</p>
+        <div class="cta">
+          <a class="btn primary js-download" href="https://github.com/Reuz0201/Undertone-app/releases/latest" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+            Скачать для Windows
+          </a>
+          <a class="btn ghost" href="https://github.com/Reuz0201/Undertone-app" target="_blank" rel="noopener">Исходники на GitHub</a>
+        </div>
+        <p class="meta">Windows 10 и 11 · бесплатно · обновляется сам</p>
+      </div>
+
+      <div class="player" aria-label="Так выглядит плеер">
+        <div class="now">
+          <div class="cover" aria-hidden="true"></div>
+          <div>
+            <div class="kicker" id="np-source">Моя волна · Яндекс Музыка</div>
+            <h3 id="np-title">Северное сияние</h3>
+            <div class="artist" id="np-artist">Полярная ночь</div>
+            <div class="tags">
+              <span class="tag on">♥ Нравится</span>
+              <span class="tag" id="np-fx">Обычный</span>
+            </div>
+          </div>
+        </div>
+        <canvas class="spectrum" id="spectrum" aria-hidden="true"></canvas>
+        <div class="progress"><span id="np-pos">1:24</span><div class="bar"><span id="np-bar"></span></div><span id="np-dur">3:41</span></div>
+        <div class="controls" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+          <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></span>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
+        </div>
+        <p class="hint">Цвет интерфейса подстраивается под обложку трека</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" aria-labelledby="services-title">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Три сервиса</span>
+        <h2 id="services-title">Входишь куда хочешь — переключаешься кликом по профилю</h2>
+        <p>Аккаунты живут рядом: история, статистика и кэш у каждого свои. Токены хранятся только на твоём компьютере, в зашифрованном виде.</p>
+      </div>
+      <div class="services">
+        <article class="svc">
+          <div class="logo" style="background:#ffcc00;color:#14161c">Я</div>
+          <h3>Яндекс Музыка</h3>
+          <ul>
+            <li>Моя волна с настройкой характера, настроения и языка</li>
+            <li>Качество без потерь (FLAC) и выравнивание громкости</li>
+            <li>Тексты с подсветкой строки и переводом</li>
+            <li>Скачивание плейлистов для офлайна</li>
+          </ul>
+          <p class="note">Вход по коду на ya.ru/device</p>
+        </article>
+        <article class="svc">
+          <div class="logo" style="background:#ff5500;color:#fff">SC</div>
+          <h3>SoundCloud</h3>
+          <ul>
+            <li>Лайки, плейлисты, страницы авторов</li>
+            <li>«Похожие» под каждым треком</li>
+            <li>Трек начинает играть, пока ещё качается</li>
+            <li>Эффекты, эквалайзер и офлайн как у Яндекса</li>
+          </ul>
+          <p class="note">Вход через браузер</p>
+        </article>
+        <article class="svc">
+          <div class="logo" style="background:#1db954;color:#0c0c11">S</div>
+          <h3>Spotify</h3>
+          <ul>
+            <li>Своя волна: пропуски и дослушивания меняют, что будет дальше</li>
+            <li>Миксы: ежедневный, открытия, топ месяца, по жанрам и артистам</li>
+            <li>Лайки, плейлисты, альбомы, похожие артисты</li>
+            <li>Звук играет встроенный плеер Spotify</li>
+          </ul>
+          <p class="note">Нужен Spotify Premium</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="effects" aria-labelledby="effects-title">
+    <div class="wrap fx">
+      <div class="fx-desc">
+        <span class="eyebrow">Эффекты · клавиша E</span>
+        <h2 id="effects-title" style="font-size:clamp(28px,3.6vw,42px);line-height:1.1">Slowed + reverb одной кнопкой</h2>
+        <p>Скорость как у пластинки: медленнее — ниже, быстрее — выше. Эхо от сухого до огромного зала. И <strong>8D-звук</strong>, который медленно кружит вокруг головы — в наушниках особенно.</p>
+        <p>Переключается на лету, трек не перезапускается. Визуализатор пляшет под то, что слышно.</p>
+      </div>
+      <div class="fx-panel">
+        <div class="pills" role="group" aria-label="Пресеты эффектов" id="fx-pills"></div>
+        <div class="readout">
+          <div><b id="fx-speed">1.00×</b><span>скорость</span></div>
+          <div><b id="fx-reverb">нет</b><span>эхо</span></div>
+          <div><b id="fx-spin">выкл</b><span>8D</span></div>
+        </div>
+        <canvas class="wave" id="wave" aria-hidden="true"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" aria-labelledby="features-title">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Что ещё умеет</span>
+        <h2 id="features-title">Всё, чего не хватало в официальных приложениях</h2>
+      </div>
+      <div class="grid">
+        <article class="card span-3">
+          <h3>Итоги, как Spotify Wrapped</h3>
+          <p>Истории на весь экран за месяц, год или всё время: минуты, артист и трек №1, топ-5, время суток, рекорды. Итоговую карточку можно сохранить картинкой. Клавиша Y.</p>
+          <div class="recap" aria-label="Пример карточки итогов">
+            <small>UNDERTONE · ИТОГИ · ОКТЯБРЬ</small>
+            <div class="big" id="recap-min">4 812</div>
+            <div>минут музыки</div>
+            <div class="row"><span>Ночная сова</span><span>Артист №1: Полярная ночь</span><span>12 дней подряд</span></div>
+          </div>
+        </article>
+        <article class="card span-3">
+          <h3>Слушать вместе</h3>
+          <p>Комната с друзьями: у всех играет одно и то же, секунда в секунду. Лента друзей показывает, кто что слушает, а «Микс компании» каждый день собирает общий плейлист из ваших лайков.</p>
+          <h3 style="margin-top:12px">Эквалайзер на 10 полос</h3>
+          <div class="eq" id="eq" aria-hidden="true"></div>
+          <div class="eq-labels" aria-hidden="true"><span>31</span><span>62</span><span>125</span><span>250</span><span>500</span><span>1k</span><span>2k</span><span>4k</span><span>8k</span><span>16k</span></div>
+        </article>
+        <article class="card span-2">
+          <div class="split">
+            <div class="qr" id="qr" aria-hidden="true"></div>
+            <div>
+              <h3>Пульт с телефона</h3>
+              <p>Сканируешь QR — телефон становится пультом. Ничего ставить не нужно.</p>
+            </div>
+          </div>
+        </article>
+        <article class="card span-2">
+          <h3>Офлайн и мини-плеер</h3>
+          <p>Плейлисты скачиваются на диск. Мини-плеер висит поверх всех окон, а медиаклавиши и Bluetooth-наушники работают как надо.</p>
+        </article>
+        <article class="card span-2">
+          <h3>Сам обновляется</h3>
+          <p>Новая версия ставится без вопросов и перезапускается между треками — музыка продолжается с того же места.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="keys" aria-labelledby="keys-title">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Горячие клавиши</span>
+        <h2 id="keys-title">Мышь можно не трогать</h2>
+      </div>
+      <div class="keys">
+        <div class="key"><div class="k"><kbd>Пробел</kbd></div><span>Играть / пауза</span></div>
+        <div class="key"><div class="k"><kbd>N</kbd><kbd>P</kbd></div><span>Следующий / предыдущий</span></div>
+        <div class="key"><div class="k"><kbd>←</kbd><kbd>→</kbd></div><span>Перемотка на 5 секунд, с Shift — на 15</span></div>
+        <div class="key"><div class="k"><kbd>L</kbd></div><span>Нравится</span></div>
+        <div class="key"><div class="k"><kbd>W</kbd></div><span>Моя волна</span></div>
+        <div class="key"><div class="k"><kbd>E</kbd></div><span>Эффекты</span></div>
+        <div class="key"><div class="k"><kbd>Y</kbd></div><span>Итоги</span></div>
+        <div class="key"><div class="k"><kbd>T</kbd></div><span>Текст песни</span></div>
+        <div class="key"><div class="k"><kbd>F11</kbd></div><span>Режим вечеринки на весь экран</span></div>
+        <div class="key"><div class="k"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>␣</kbd></div><span>Пауза из любой программы</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final" aria-labelledby="final-title">
+    <div class="wrap">
+      <h2 id="final-title">Включай.</h2>
+      <p>Последняя версия — на GitHub. Скачай архив, распакуй и запусти Undertone.exe.</p>
+      <div class="cta">
+        <a class="btn primary js-download" href="https://github.com/Reuz0201/Undertone-app/releases/latest" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+          Скачать последний релиз
+        </a>
+        <a class="btn ghost" href="https://github.com/Reuz0201/Undertone-app/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Что нового</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Undertone · неофициальный плеер, не связан с Яндексом, SoundCloud и Spotify</span>
+    <a href="https://github.com/Reuz0201/Undertone-app" target="_blank" rel="noopener">github.com/Reuz0201/Undertone-app</a>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  const liveColor = () => getComputedStyle(root).getPropertyValue('--live').trim() || '#8b7bff';
+
+  // ── «обложки»: акцент меняется вместе с треком, как в приложении ──
+  const tracks = [
+    { title: 'Северное сияние', artist: 'Полярная ночь', source: 'Моя волна · Яндекс Музыка', color: '#8b7bff', dur: 221 },
+    { title: 'Тёплый асфальт', artist: 'Город Неонов', source: 'Миксы · Spotify', color: '#ff8a5b', dur: 198 },
+    { title: 'Ночной трамвай', artist: 'Кольцевая', source: 'Лайки · SoundCloud', color: '#3fd0a6', dur: 245 },
+    { title: 'Медленный снег', artist: 'Девятый этаж', source: 'Итоги · топ месяца', color: '#5aa8ff', dur: 186 },
+  ];
+  let ti = 0, pos = 84;
+  const $ = id => document.getElementById(id);
+  const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  function showTrack(t) {
+    $('np-title').textContent = t.title;
+    $('np-artist').textContent = t.artist;
+    $('np-source').textContent = t.source;
+    $('np-dur').textContent = fmt(t.dur);
+    root.style.setProperty('--live', t.color);
+  }
+  showTrack(tracks[0]);
+  if (!reduce) setInterval(() => { ti = (ti + 1) % tracks.length; pos = 6; showTrack(tracks[ti]); }, 7000);
+  setInterval(() => {
+    const t = tracks[ti];
+    pos = Math.min(t.dur, pos + speed);
+    $('np-pos').textContent = fmt(pos);
+    $('np-bar').style.width = (pos / t.dur * 100).toFixed(1) + '%';
+  }, 1000);
+
+  // ── визуализатор: столбики спектра, бас сильнее, со сглаживанием ──
+  const spec = $('spectrum'), sctx = spec.getContext('2d');
+  const BARS = 44; const levels = new Array(BARS).fill(0);
+  function fit(c) {
+    const r = c.getBoundingClientRect(), d = devicePixelRatio || 1;
+    c.width = Math.max(1, Math.round(r.width * d)); c.height = Math.max(1, Math.round(r.height * d));
+  }
+  let t0 = performance.now();
+  function drawSpectrum(now) {
+    const t = (now - t0) / 1000 * speed;
+    const w = spec.width, h = spec.height;
+    sctx.clearRect(0, 0, w, h);
+    const gap = w / BARS * 0.28, bw = w / BARS - gap;
+    sctx.fillStyle = liveColor();
+    const beat = Math.pow(Math.max(0, Math.sin(t * Math.PI * 2 * 1.9)), 6);
+    for (let i = 0; i < BARS; i++) {
+      const f = i / BARS;
+      const base = (1 - f) * 0.55 + 0.12;
+      const wob = 0.5 + 0.5 * Math.sin(t * (1.3 + f * 3.1) + i * 1.7) * Math.cos(t * 0.7 + i * 0.4);
+      let v = base * (0.45 + 0.55 * wob) + (f < 0.18 ? beat * 0.45 : beat * 0.08);
+      v *= 1 - reverb * 0.15 * f;
+      levels[i] += (v - levels[i]) * 0.25;
+      const bh = Math.max(3, levels[i] * h * 0.95);
+      const x = i * (bw + gap) + gap / 2;
+      sctx.globalAlpha = 0.45 + 0.55 * levels[i];
+      sctx.beginPath();
+      sctx.roundRect ? sctx.roundRect(x, h - bh, bw, bh, Math.min(4, bw / 2)) : sctx.rect(x, h - bh, bw, bh);
+      sctx.fill();
+    }
+    sctx.globalAlpha = 1;
+  }
+
+  // ── эффекты: пресеты как в приложении ──
+  const presets = [
+    { name: 'Обычный', speed: 1, reverb: 0, spin: false },
+    { name: 'Slowed + reverb', speed: 0.85, reverb: 0.45, spin: false },
+    { name: 'Super slowed', speed: 0.72, reverb: 0.6, spin: false },
+    { name: 'Speed up', speed: 1.2, reverb: 0, spin: false },
+    { name: 'Nightcore', speed: 1.32, reverb: 0.1, spin: false },
+    { name: '8D', speed: 1, reverb: 0.25, spin: true },
+  ];
+  let speed = 1, reverb = 0, spin = false;
+  const pills = $('fx-pills');
+  presets.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'pill'; b.type = 'button'; b.id = 'fx-' + i; b.textContent = p.name;
+    b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    b.addEventListener('click', () => {
+      [...pills.children].forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      speed = p.speed; reverb = p.reverb; spin = p.spin;
+      $('fx-speed').textContent = speed.toFixed(2) + '×';
+      $('fx-reverb').textContent = reverb ? Math.round(reverb * 100) + '%' : 'нет';
+      $('fx-spin').textContent = spin ? 'вкл' : 'выкл';
+      $('np-fx').textContent = p.name;
+      $('np-fx').classList.toggle('on', i !== 0);
+    });
+    pills.appendChild(b);
+  });
+
+  // волна: частота следует за скоростью, эхо — затухающие копии, 8D — громкость гуляет между каналами
+  const wave = $('wave'), wctx = wave.getContext('2d');
+  function drawWave(now) {
+    const t = (now - t0) / 1000;
+    const w = wave.width, h = wave.height, d = devicePixelRatio || 1;
+    wctx.clearRect(0, 0, w, h);
+    const color = liveColor();
+    const freq = 6 * speed;
+    const lanes = spin ? [
+      { y: h * 0.32, gain: 0.5 + 0.5 * Math.sin(t * 0.8), label: 'L' },
+      { y: h * 0.72, gain: 0.5 - 0.5 * Math.sin(t * 0.8), label: 'R' },
+    ] : [{ y: h / 2, gain: 1, label: '' }];
+    for (const lane of lanes) {
+      const amp = (spin ? h * 0.16 : h * 0.3) * (0.25 + 0.75 * lane.gain);
+      const echoes = reverb > 0 ? 3 : 0;
+      for (let e = echoes; e >= 0; e--) {
+        wctx.strokeStyle = color;
+        wctx.globalAlpha = e === 0 ? 1 : reverb * (0.5 / e);
+        wctx.lineWidth = (e === 0 ? 2.2 : 1.4) * d;
+        wctx.beginPath();
+        for (let x = 0; x <= w; x += 2 * d) {
+          const p = x / w;
+          const phase = t * 2.2 * speed - e * 0.55;
+          const env = Math.sin(p * Math.PI);
+          const y = lane.y + Math.sin(p * Math.PI * 2 * freq - phase) * amp * env * (1 - e * 0.18)
+                           + Math.sin(p * Math.PI * 2 * freq * 2.7 - phase * 1.6) * amp * 0.25 * env;
+          x === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+        }
+        wctx.stroke();
+      }
+      if (lane.label) {
+        wctx.globalAlpha = 0.6;
+        wctx.fillStyle = color;
+        wctx.font = `${12 * d}px "JetBrains Mono", monospace`;
+        wctx.fillText(lane.label, 10 * d, lane.y - amp - 6 * d);
+      }
+    }
+    wctx.globalAlpha = 1;
+  }
+
+  // ── эквалайзер «Больше баса» и QR-заглушка для пульта ──
+  const eqGains = [6, 5, 4, 2, 0, 0, 0, 1, 2, 3];
+  const eq = $('eq');
+  eqGains.forEach(g => { const s = document.createElement('span'); s.style.height = (30 + g * 9) + '%'; eq.appendChild(s); });
+  const qr = $('qr');
+  const pattern = '111101111100100001101111101001000101111110001001010100110101011111100111101100001';
+  for (let i = 0; i < 81; i++) { const c = document.createElement('i'); if (pattern[i] !== '1') c.className = 'o'; qr.appendChild(c); }
+
+  // ── итоги: число набегает, как в приложении (видно и без анимации) ──
+  const recap = $('recap-min');
+  if (!reduce) {
+    const target = 4812, start = performance.now();
+    const tick = now => {
+      const k = Math.min(1, (now - start) / 1600), e = 1 - Math.pow(1 - k, 3);
+      recap.textContent = Math.round(target * (0.6 + 0.4 * e)).toLocaleString('ru-RU');
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  function resize() { fit(spec); fit(wave); }
+  resize();
+  addEventListener('resize', resize);
+  function frame(now) { drawSpectrum(now); drawWave(now); if (!reduce) requestAnimationFrame(frame); }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
